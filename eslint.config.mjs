@@ -18,6 +18,8 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Vendored from the component library; kept byte-for-byte so updates stay easy.
+      "src/components/ui/**",
     ],
   },
 ];

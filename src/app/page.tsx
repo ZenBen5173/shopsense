@@ -1,103 +1,100 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useEffect, useState } from "react";
+import { MathCurveLoader } from "@/components/ui/math-curve-loader";
+import { FlipFadeText } from "@/components/ui/flip-fade-text";
+import { Header } from "@/components/shopsense/header";
+import { AdviceCard } from "@/components/shopsense/advice-card";
+import { StatTiles } from "@/components/shopsense/stat-tiles";
+import { HoursChart } from "@/components/shopsense/hours-chart";
+import { WeekHeatmap } from "@/components/shopsense/week-heatmap";
+import { Insights } from "@/components/shopsense/insights";
+import { Deliveries } from "@/components/shopsense/deliveries";
+import { LiveFeed } from "@/components/shopsense/live-feed";
+import { SalesDialog } from "@/components/shopsense/sales-dialog";
+import { useDashboard } from "@/components/shopsense/use-dashboard";
+import { t } from "@/components/shopsense/i18n";
+import type { Lang } from "@/lib/domain/types";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Dashboard() {
+  const [lang, setLang] = useState<Lang | null>(null);
+  const { data, error, refresh, setData } = useDashboard(lang);
+  const [salesOpen, setSalesOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("shopsense:lang");
+      if (saved === "en" || saved === "ms") setLang(saved);
+    } catch {}
+  }, []);
+
+  const chooseLang = (l: Lang) => {
+    setLang(l);
+    try {
+      localStorage.setItem("shopsense:lang", l);
+    } catch {}
+  };
+
+  if (!data) {
+    return (
+      <main className="grid min-h-dvh place-items-center bg-background p-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <MathCurveLoader curve="rose" size={64} className="text-[var(--indigo-11)]" label="Loading ShopSense" />
+          <FlipFadeText words={t(lang ?? "en").loading} className="min-h-0 py-2" textClassName="text-sm font-medium tracking-wide text-muted-foreground" interval={1800} />
+          {error && <p className="max-w-sm text-sm text-[var(--red-11)]">{error}</p>}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    );
+  }
+
+  const L = lang ?? data.lang;
+
+  return (
+    <div className="min-h-dvh bg-background">
+      <Header d={data} lang={L} setLang={chooseLang} refresh={refresh} />
+      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+        {error && <p className="rounded-lg border border-[var(--red-6)] bg-[var(--red-3)] px-3 py-2 text-sm text-[var(--red-11)]">{error}</p>}
+
+        <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+          <div className="min-w-0 space-y-5">
+            <AdviceCard advice={data.advice} alerts={data.alerts} lang={L} onAdvice={(advice) => setData({ ...data, advice })} />
+            <StatTiles d={data} lang={L} onEnterSales={() => setSalesOpen(true)} />
+            <HoursChart
+              today={data.today.byHour}
+              typical={data.today.typicalByHour}
+              busy={data.today.busyHours}
+              nowHour={Math.floor(data.clock.minuteOfDay / 60)}
+              openAt={data.shop.openAt}
+              closeAt={data.shop.closeAt}
+              lang={L}
+            />
+          </div>
+          <div className="min-w-0 space-y-5">
+            <Deliveries enabled={data.deliveries.enabled} today={data.deliveries.today} recent={data.deliveries.recent} scorecard={data.deliveries.scorecard} lang={L} />
+            <LiveFeed feed={data.feed} lang={L} simNow={data.clock.now} />
+          </div>
+        </div>
+
+        <Insights insights={data.insights} lang={L} />
+        <WeekHeatmap heat={data.heatmap} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />
+
+        <footer className="flex flex-wrap items-center justify-between gap-2 pt-4 text-[11px] text-muted-foreground">
+          <span>
+            ShopSense · Ring Partner API + Amazon Bedrock · {data.totals.events.toLocaleString()} {L === "ms" ? "peristiwa kamera" : "camera events"}
+          </span>
+          <span>{L === "ms" ? "Tiada wajah disimpan. Hanya kiraan." : "No faces stored. Only counts."}</span>
+        </footer>
+      </main>
+
+      <SalesDialog
+        open={salesOpen}
+        onOpenChange={setSalesOpen}
+        lang={L}
+        currency={data.shop.currency}
+        initial={data.today.sales}
+        visitors={data.today.visitors}
+        onSaved={refresh}
+      />
     </div>
   );
 }
