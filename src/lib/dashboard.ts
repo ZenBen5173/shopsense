@@ -8,7 +8,8 @@ import { countEvents, eventsBetween, getShop, listCameras, listExpected, listSal
 import { getClock, nowFrom } from "./clock";
 import { getSource } from "./ring";
 import { visionMode } from "./vision";
-import { addDays, hhmm, localParts, zonedToUtc } from "./domain/time";
+import { addDays, hhmm, localParts, WEEKDAY_NAMES, zonedToUtc } from "./domain/time";
+import { tr } from "./domain/lang";
 import type { DeliveryRecord, Lang, SalesDay, StoredEvent } from "./domain/types";
 import { busyProfile, conversion, footfallByDate, paceVsTypical, peakSlot, staffingPlan, weekCompare, weekHeatmap, type RotaDay, type WeekCompare } from "./brains/front";
 import { buildVisits, reconcileDay } from "./brains/back";
@@ -130,19 +131,19 @@ function toRow(r: DeliveryRecord, tz: string): DeliveryRow {
 function feedItem(e: StoredEvent & { cameraName: string }, lang: Lang): FeedItem | null {
   const v = e.vision;
   if (!v) return null;
-  const ms = lang === "ms";
+  const t3 = (en: string, ms: string, zh: string) => tr(lang, en, ms, zh);
   const base = { id: e.id, at: e.occurredAt, camera: e.cameraName, confidence: v.confidence, provider: e.provider };
   if (v.kind === "front") {
     if (e.role !== "front") return null;
     if (v.customers > 0)
-      return { ...base, role: "front", type: "customer", text: ms ? `${v.customers} pelanggan masuk` : `${v.customers} customer${v.customers > 1 ? "s" : ""} walked in` };
-    if (v.staff > 0) return { ...base, role: "front", type: "staff", text: ms ? `Pekerja masuk` : `Staff came in` };
-    if (v.leaving > 0) return { ...base, role: "front", type: "left", text: ms ? `${v.leaving} orang keluar` : `${v.leaving} left` };
+      return { ...base, role: "front", type: "customer", text: t3(`${v.customers} customer${v.customers > 1 ? "s" : ""} walked in`, `${v.customers} pelanggan masuk`, `${v.customers}位顾客进店`) };
+    if (v.staff > 0) return { ...base, role: "front", type: "staff", text: t3("Staff came in", "Pekerja masuk", "员工进店") };
+    if (v.leaving > 0) return { ...base, role: "front", type: "left", text: t3(`${v.leaving} left`, `${v.leaving} orang keluar`, `${v.leaving}人离开`) };
     return null;
   }
   if (e.role !== "back") return null;
   if (v.isDelivery)
-    return { ...base, role: "back", type: "delivery", text: (ms ? "Penghantaran: " : "Delivery: ") + (v.supplierText ?? v.vehicle ?? (ms ? "pembekal tidak dikenali" : "unreadable van")) };
+    return { ...base, role: "back", type: "delivery", text: t3("Delivery: ", "Penghantaran: ", "送货：") + (v.supplierText ?? v.vehicle ?? t3("unreadable van", "pembekal tidak dikenali", "看不清的货车")) };
   return { ...base, role: "back", type: "other", text: v.description };
 }
 
@@ -221,16 +222,16 @@ export async function computeDashboard(db: Db, langOverride?: Lang): Promise<Das
 
   // Alerts: what matters in the next few hours.
   const alerts: Alert[] = [];
-  const ms = lang === "ms";
+  const t3 = (en: string, ms: string, zh: string) => tr(lang, en, ms, zh);
   for (const r of todayRecords) {
     if (r.status === "late" && r.expected)
-      alerts.push({ kind: "late", tone: "bad", text: ms ? `${r.expected.supplierName} sampai lewat ${r.lateByMin} minit hari ini.` : `${r.expected.supplierName} arrived ${r.lateByMin} min late today.` });
+      alerts.push({ kind: "late", tone: "bad", text: t3(`${r.expected.supplierName} arrived ${r.lateByMin} min late today.`, `${r.expected.supplierName} sampai lewat ${r.lateByMin} minit hari ini.`, `${r.expected.supplierName}今天迟到了${r.lateByMin}分钟。`) });
     if (r.status === "missing" && r.expected)
-      alerts.push({ kind: "missing", tone: "bad", text: ms ? `${r.expected.supplierName} belum sampai (dijangka ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}). Telefon mereka.` : `${r.expected.supplierName} hasn't shown up (expected ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}). Give them a call.` });
+      alerts.push({ kind: "missing", tone: "bad", text: t3(`${r.expected.supplierName} hasn't shown up (expected ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}). Give them a call.`, `${r.expected.supplierName} belum sampai (dijangka ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}). Telefon mereka.`, `${r.expected.supplierName}还没到（原定${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}）。打个电话问问。`) });
     if (r.status === "pending" && r.expected) {
       const overlaps = profile.busyHours.some((h) => h * 60 < r.expected!.windowEnd + 30 && (h + 1) * 60 > r.expected!.windowStart);
       if (overlaps)
-        alerts.push({ kind: "rush_delivery", tone: "warn", text: ms ? `${r.expected.supplierName} dijangka ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}, bertembung dengan waktu sibuk. Sediakan ruang di pintu belakang.` : `${r.expected.supplierName} is due ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}, overlapping your rush. Keep the back door clear.` });
+        alerts.push({ kind: "rush_delivery", tone: "warn", text: t3(`${r.expected.supplierName} is due ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}, overlapping your rush. Keep the back door clear.`, `${r.expected.supplierName} dijangka ${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}, bertembung dengan waktu sibuk. Sediakan ruang di pintu belakang.`, `${r.expected.supplierName}预计${hhmm(r.expected.windowStart)}–${hhmm(r.expected.windowEnd)}到，正好碰上繁忙时段。请留出后门空间。`) });
     }
   }
   const upcoming = profile.busyHours.filter((h) => h >= np.hour);
@@ -240,14 +241,14 @@ export async function computeDashboard(db: Db, langOverride?: Lang): Promise<Das
       kind: "next_rush",
       tone: "info",
       text: h === np.hour
-        ? ms ? `Sekarang waktu sibuk — biasanya ${Math.round(profile.avgByHour[h])} pelanggan sejam. Pastikan dua orang di kaunter.` : `You're in a rush hour now — usually ${Math.round(profile.avgByHour[h])} customers an hour. Keep two people on the counter.`
-        : ms ? `Waktu sibuk seterusnya: ${hourText(h, lang)} (biasanya ${Math.round(profile.avgByHour[h])} pelanggan).` : `Next rush: ${hourText(h, lang)} (usually ${Math.round(profile.avgByHour[h])} customers).`,
+        ? t3(`You're in a rush hour now — usually ${Math.round(profile.avgByHour[h])} customers an hour. Keep two people on the counter.`, `Sekarang waktu sibuk — biasanya ${Math.round(profile.avgByHour[h])} pelanggan sejam. Pastikan dua orang di kaunter.`, `现在是繁忙时段——通常每小时${Math.round(profile.avgByHour[h])}位顾客。柜台请安排两个人。`)
+        : t3(`Next rush: ${hourText(h, lang)} (usually ${Math.round(profile.avgByHour[h])} customers).`, `Waktu sibuk seterusnya: ${hourText(h, lang)} (biasanya ${Math.round(profile.avgByHour[h])} pelanggan).`, `下一个繁忙时段：${hourText(h, lang)}（通常${Math.round(profile.avgByHour[h])}位顾客）。`),
     });
   }
   if (pace.ratio !== null && pace.typical >= 20) {
     const pct = Math.round((pace.ratio - 1) * 100);
-    if (pct >= 12) alerts.push({ kind: "pace_up", tone: "good", text: ms ? `${pct}% lebih ramai daripada ${["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"][np.weekday]} biasa setakat ini.` : `${pct}% busier than a usual ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][np.weekday]} so far.` });
-    if (pct <= -12) alerts.push({ kind: "pace_down", tone: "warn", text: ms ? `${-pct}% kurang ramai daripada biasa setakat ini.` : `${-pct}% quieter than usual so far.` });
+    if (pct >= 12) alerts.push({ kind: "pace_up", tone: "good", text: t3(`${pct}% busier than a usual ${WEEKDAY_NAMES.en[np.weekday]} so far.`, `${pct}% lebih ramai daripada ${WEEKDAY_NAMES.ms[np.weekday]} biasa setakat ini.`, `到目前为止比平常的${WEEKDAY_NAMES.zh[np.weekday]}多${pct}%。`) });
+    if (pct <= -12) alerts.push({ kind: "pace_down", tone: "warn", text: t3(`${-pct}% quieter than usual so far.`, `${-pct}% kurang ramai daripada biasa setakat ini.`, `到目前为止比平常少${-pct}%。`) });
   }
   const order = { bad: 0, warn: 1, good: 2, info: 3 };
   alerts.sort((a, b) => order[a.tone] - order[b.tone]);

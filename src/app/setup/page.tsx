@@ -322,9 +322,9 @@ export default function SetupPage() {
             </div>
             <div className="flex items-center justify-between gap-3 sm:col-span-2">
               <div className="flex rounded-full border border-border bg-muted/50 p-0.5 text-xs">
-                {(["en", "ms"] as const).map((l) => (
+                {(["en", "ms", "zh"] as const).map((l) => (
                   <button type="button" key={l} onClick={() => setShopForm({ ...shopForm, lang: l })} className={cn("rounded-full px-3 py-1 transition", shopForm.lang === l ? "bg-foreground text-background" : "text-muted-foreground")}>
-                    {l === "en" ? "English" : "Bahasa Melayu"}
+                    {{ en: "English", ms: "Bahasa Melayu", zh: "中文" }[l]}
                   </button>
                 ))}
               </div>

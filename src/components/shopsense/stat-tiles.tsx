@@ -10,6 +10,7 @@ import { WEEKDAY_NAMES } from "@/lib/domain/time";
 import { Spotlight } from "./spotlight";
 import { t } from "./i18n";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/domain/lang";
 
 function Tile({ icon: Icon, label, children, delay, glow }: { icon: typeof Users; label: string; children: React.ReactNode; delay: number; glow?: string }) {
   return (
@@ -56,7 +57,7 @@ export function StatTiles({ d, lang, onEnterSales }: { d: DashboardData; lang: L
           <SweepSparkline
             data={[...d.trend.map((x) => x.visitors), d.today.visitors]}
             className="h-7 w-16 shrink-0 text-[var(--indigo-11)] sm:w-20"
-            tooltip={<span>{lang === "ms" ? "14 hari lepas" : "Last 14 days"}</span>}
+            tooltip={<span>{tr(lang, "Last 14 days", "14 hari lepas", "过去14天")}</span>}
           />
         </div>
         <p className="mt-1 truncate text-xs text-muted-foreground">
@@ -82,8 +83,8 @@ export function StatTiles({ d, lang, onEnterSales }: { d: DashboardData; lang: L
               size={58}
               stroke={7}
               segments={[
-                { label: lang === "ms" ? "Membeli" : "Bought", value: d.today.sales?.buyerCount ?? 0, tint: "var(--grass-9)" },
-                { label: lang === "ms" ? "Tengok sahaja" : "Just looked", value: Math.max(0, d.today.visitors - (d.today.sales?.buyerCount ?? 0)), tint: "var(--slate-7)" },
+                { label: tr(lang, "Bought", "Membeli", "有买"), value: d.today.sales?.buyerCount ?? 0, tint: "var(--grass-9)" },
+                { label: tr(lang, "Just looked", "Tengok sahaja", "只是看看"), value: Math.max(0, d.today.visitors - (d.today.sales?.buyerCount ?? 0)), tint: "var(--slate-7)" },
               ]}
               className="[&>ul]:hidden"
             />

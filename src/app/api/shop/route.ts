@@ -29,7 +29,7 @@ const Body = z.object({
   closeAt: z.number().int().min(1).max(1440).optional(),
   staffHint: z.string().max(120).optional(),
   currency: z.string().max(6).optional(),
-  lang: z.enum(["en", "ms"]).optional(),
+  lang: z.enum(["en", "ms", "zh"]).optional(),
 });
 
 export async function PATCH(req: Request) {

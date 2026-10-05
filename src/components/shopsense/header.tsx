@@ -9,6 +9,7 @@ import type { Lang } from "@/lib/domain/types";
 import { WEEKDAY_NAMES } from "@/lib/domain/time";
 import { t } from "./i18n";
 import { post } from "./use-dashboard";
+import { LANG_LABEL, LANGS, tr } from "@/lib/domain/lang";
 import { lastSaturday } from "./tour";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +53,10 @@ export function Header({ d, lang, setLang, refresh }: { d: DashboardData; lang: 
   }
 
   async function reset(today?: string) {
-    const id = toast.loading(lang === "ms" ? "Memuatkan kedai demo…" : "Loading the demo shop…");
+    const id = toast.loading(tr(lang, "Loading the demo shop…", "Memuatkan kedai demo…", "正在加载演示店…"));
     try {
       await post("/api/demo/reset", today ? { today, startAt: 11 * 60 + 30 } : {});
-      toast.success(lang === "ms" ? "Sedia" : "Ready", { id });
+      toast.success(tr(lang, "Ready", "Sedia", "好了"), { id });
       refresh();
     } catch (err) {
       toast.error((err as Error).message, { id });
@@ -93,7 +94,7 @@ export function Header({ d, lang, setLang, refresh }: { d: DashboardData; lang: 
               <Segmented value={SPEEDS.includes(d.clock.speed) ? d.clock.speed : 60} options={SPEEDS} onChange={(v) => clock({ speed: v, paused: false })} render={(v) => `${v}×`} />
             </>
           )}
-          <Segmented value={lang} options={["en", "ms"] as Lang[]} onChange={setLang} render={(v) => (v === "en" ? "EN" : "BM")} />
+          <Segmented value={lang} options={LANGS} onChange={setLang} render={(v) => LANG_LABEL[v]} />
           <Link href="/how-it-works" className="grid size-8 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground" aria-label={c.howItWorks}>
             <Info className="size-4" />
           </Link>
@@ -107,8 +108,8 @@ export function Header({ d, lang, setLang, refresh }: { d: DashboardData; lang: 
         <div className="border-b border-border/60 bg-[var(--indigo-2)]">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-1.5 text-[11px] text-muted-foreground sm:px-6">
             <span>
-              {c.demoBanner} {d.clock.speed}× · {d.totals.daysOfHistory} {lang === "ms" ? "hari sejarah" : "days of history"} · {lang === "ms" ? "penglihatan" : "vision"}:{" "}
-              <b className="font-medium text-foreground/80">{d.vision === "bedrock" ? "Amazon Bedrock" : lang === "ms" ? "simulasi" : "simulated"}</b>
+              {c.demoBanner} {d.clock.speed}× · {d.totals.daysOfHistory} {tr(lang, "days of history", "hari sejarah", "天历史")} · {tr(lang, "vision", "penglihatan", "视觉")}:{" "}
+              <b className="font-medium text-foreground/80">{d.vision === "bedrock" ? "Amazon Bedrock" : tr(lang, "simulated", "simulasi", "模拟")}</b>
             </span>
             <span className="ml-auto flex gap-3">
               {d.clock.weekday !== 6 && (

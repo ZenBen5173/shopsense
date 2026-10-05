@@ -110,6 +110,13 @@ export function hourLabel(hour: number): string {
 export const WEEKDAY_NAMES = {
   en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
   ms: ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"],
+  zh: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
 } as const;
+
+/** Short weekday label for tight spaces: "Mon", "Isn", "周一". */
+export function weekdayShort(wd: number, lang: "en" | "ms" | "zh"): string {
+  if (lang === "zh") return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][wd];
+  return WEEKDAY_NAMES[lang][wd].slice(0, 3);
+}
 
 export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;

@@ -8,6 +8,7 @@ import type { Lang } from "@/lib/domain/types";
 import { Spotlight, PanelTitle } from "./spotlight";
 import { t } from "./i18n";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/domain/lang";
 
 const ICON = {
   delivery_in_rush: Truck,
@@ -32,7 +33,7 @@ export function Insights({ insights, lang, atStake, currency }: { insights: Dash
                 ≈ {currency}
                 {atStake.toLocaleString()}
               </p>
-              <p className="text-[10px] text-muted-foreground">{lang === "ms" ? "dipertaruhkan seminggu" : "at stake every week"}</p>
+              <p className="text-[10px] text-muted-foreground">{tr(lang, "at stake every week", "dipertaruhkan seminggu", "每周涉及金额")}</p>
             </motion.div>
           ) : undefined
         }

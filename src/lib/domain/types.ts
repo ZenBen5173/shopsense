@@ -5,7 +5,7 @@
 
 export type CameraRole = "front" | "back" | "ignore";
 export type Confidence = "high" | "medium" | "low";
-export type Lang = "en" | "ms";
+export type Lang = "en" | "ms" | "zh";
 
 export interface Camera {
   id: string;

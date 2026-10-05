@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import type { Lang } from "@/lib/domain/types";
 import { post } from "./use-dashboard";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/domain/lang";
 
 const KEY = "shopsense:tour";
 type TourState = { hidden?: boolean; bm?: boolean; how?: boolean };
@@ -58,7 +59,7 @@ export function Tour({
   const [state, setState] = useState<TourState | null>(null);
   useEffect(() => setState(read()), []);
   useEffect(() => {
-    if (lang === "ms" && state && !state.bm) {
+    if (lang !== "en" && state && !state.bm) {
       const next = { ...state, bm: true };
       setState(next);
       write(next);
@@ -66,28 +67,29 @@ export function Tour({
   }, [lang, state]);
 
   if (!state || state.hidden) return null;
-  const ms = lang === "ms";
+  const t3 = (en: string, ms: string, zh: string) => tr(lang, en, ms, zh);
+  const nextLang: Lang = lang === "en" ? "ms" : lang === "ms" ? "zh" : "en";
 
   const steps = [
     {
       done: isSaturday,
       icon: PlayCircle,
-      label: ms ? "Main semula hari Sabtu" : "Replay a Saturday",
-      hint: ms ? "Lihat van sampai pada waktu sibuk" : "Watch the van arrive in the rush",
+      label: t3("Replay a Saturday", "Main semula hari Sabtu", "回放星期六"),
+      hint: t3("Watch the van arrive in the rush", "Lihat van sampai pada waktu sibuk", "看货车在繁忙时段到来"),
       run: async () => {
-        const id = toast.loading(ms ? "Memuatkan hari Sabtu…" : "Loading a Saturday…");
+        const id = toast.loading(t3("Loading a Saturday…", "Memuatkan hari Sabtu…", "正在加载星期六…"));
         try {
           await post("/api/demo/reset", { today: lastSaturday(date), startAt: 11 * 60 + 30 });
-          toast.success(ms ? "Perhatikan sekitar 12:15" : "Keep an eye out around 12:15", { id });
+          toast.success(t3("Keep an eye out around 12:15", "Perhatikan sekitar 12:15", "留意12:15左右"), { id });
           refresh();
         } catch (err) {
           toast.error((err as Error).message, { id });
         }
       },
     },
-    { done: hasSales, icon: Receipt, label: ms ? "Tutup hari ini" : "Close the day", hint: ms ? "Masukkan jualan" : "Type today's sales", run: openSales },
-    { done: !!state.bm, icon: Languages, label: "Bahasa Melayu", hint: ms ? "Nasihat dalam BM" : "Advice in Malay", run: () => setLang(ms ? "en" : "ms") },
-    { done: !!state.how, icon: ScanEye, label: ms ? "Lihat apa AI nampak" : "See what the AI sees", hint: ms ? "Gambar + JSON" : "Snapshot + JSON", href: "/how-it-works" },
+    { done: hasSales, icon: Receipt, label: t3("Close the day", "Tutup hari ini", "今日结算"), hint: t3("Type today's sales", "Masukkan jualan", "输入营业额"), run: openSales },
+    { done: !!state.bm, icon: Languages, label: "BM · 中文", hint: t3("Advice in Malay or Chinese", "Nasihat dalam BM atau Cina", "马来文或中文建议"), run: () => setLang(nextLang) },
+    { done: !!state.how, icon: ScanEye, label: t3("See what the AI sees", "Lihat apa AI nampak", "看看 AI 看到什么"), hint: t3("Snapshot + JSON", "Gambar + JSON", "画面 + JSON"), href: "/how-it-works" },
   ];
   const doneCount = steps.filter((s) => s.done).length;
   const cls = "group/step flex w-full items-center gap-2.5 rounded-xl border border-transparent bg-card/60 px-2.5 py-2 transition hover:-translate-y-0.5 hover:border-border";
@@ -100,7 +102,7 @@ export function Tour({
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-medium text-[var(--indigo-11)]">
-          {ms ? "Cuba empat perkara ini" : "Try these four things"} · {doneCount}/4
+          {t3("Try these four things", "Cuba empat perkara ini", "试试这四件事")} · {doneCount}/4
         </p>
         <button
           onClick={() => {
@@ -108,7 +110,7 @@ export function Tour({
             setState(next);
             write(next);
           }}
-          aria-label={ms ? "Tutup" : "Dismiss"}
+          aria-label={t3("Dismiss", "Tutup", "关闭")}
           className="grid size-6 place-items-center rounded-full text-muted-foreground transition hover:rotate-90 hover:bg-muted hover:text-foreground"
         >
           <X className="size-3.5" />

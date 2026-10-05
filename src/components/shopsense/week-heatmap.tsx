@@ -8,7 +8,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { hourText } from "@/lib/advice/copy";
-import { WEEKDAY_NAMES } from "@/lib/domain/time";
+import { weekdayShort } from "@/lib/domain/time";
 import type { Lang } from "@/lib/domain/types";
 import { Spotlight, PanelTitle } from "./spotlight";
 import { t } from "./i18n";
@@ -38,7 +38,7 @@ export function WeekHeatmap({ heat, openAt, closeAt, todayWd, lang }: { heat: nu
           <div className="text-right">
             <p className="font-display text-lg font-semibold tabular-nums">{Math.round(heat[shown.wd]?.[shown.h] ?? 0)}</p>
             <p className="text-[11px] text-muted-foreground">
-              {WEEKDAY_NAMES[lang][shown.wd].slice(0, 3)} {hourText(shown.h, lang)}
+              {weekdayShort(shown.wd, lang)} {hourText(shown.h, lang)}
             </p>
           </div>
         }
@@ -48,7 +48,7 @@ export function WeekHeatmap({ heat, openAt, closeAt, todayWd, lang }: { heat: nu
           {ORDER.map((wd) => (
             <div key={wd} className="flex items-center gap-1 py-[2px]">
               <span className={`w-9 shrink-0 text-[10px] ${wd === todayWd ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
-                {WEEKDAY_NAMES[lang][wd].slice(0, 3)}
+                {weekdayShort(wd, lang)}
               </span>
               {hours.map((h) => {
                 const v = heat[wd]?.[h] ?? 0;

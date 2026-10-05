@@ -6,11 +6,12 @@ import { Camera, ChevronDown } from "lucide-react";
 import { CursorCard } from "@/components/ui/cursor-card";
 import type { DeliveryRow, SupplierScore } from "@/lib/dashboard";
 import type { Lang } from "@/lib/domain/types";
-import { WEEKDAY_NAMES, weekdayOf } from "@/lib/domain/time";
+import { weekdayOf, weekdayShort } from "@/lib/domain/time";
 import { Spotlight, PanelTitle } from "./spotlight";
 import { Pill } from "./stat-tiles";
 import { t } from "./i18n";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/domain/lang";
 
 const TONE = { on_time: "grass", late: "red", missing: "red", pending: "slate", unexpected: "amber" } as const;
 
@@ -25,7 +26,7 @@ function Row({ r, lang, showDay }: { r: DeliveryRow; lang: Lang; showDay?: boole
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">
-          {showDay && <span className="mr-1.5 text-muted-foreground">{WEEKDAY_NAMES[lang][weekdayOf(r.date)].slice(0, 3)}</span>}
+          {showDay && <span className="mr-1.5 text-muted-foreground">{weekdayShort(weekdayOf(r.date), lang)}</span>}
           {r.supplier}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -66,11 +67,11 @@ function Row({ r, lang, showDay }: { r: DeliveryRow; lang: Lang; showDay?: boole
 }
 
 function Scorecard({ rows, lang }: { rows: SupplierScore[]; lang: Lang }) {
-  const ms = lang === "ms";
+  const t3 = (en: string, ms: string, zh: string) => tr(lang, en, ms, zh);
   if (!rows.length) return null;
   return (
     <div className="mt-4 border-t border-border pt-4">
-      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{ms ? "Rekod pembekal · 4 minggu" : "Supplier record · 4 weeks"}</p>
+      <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{t3("Supplier record · 4 weeks", "Rekod pembekal · 4 minggu", "供应商记录 · 4周")}</p>
       <ul className="mt-2.5 space-y-2.5">
         {rows.map((s, i) => {
           const pct = s.expected ? s.onTime / s.expected : 0;
@@ -80,7 +81,7 @@ function Scorecard({ rows, lang }: { rows: SupplierScore[]; lang: Lang }) {
               <div className="flex items-baseline justify-between gap-2 text-xs">
                 <span className="truncate font-medium">{s.supplier}</span>
                 <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {ms ? `${s.onTime} daripada ${s.expected} tepat masa` : `${s.onTime} of ${s.expected} on time`}
+                  {t3(`${s.onTime} of ${s.expected} on time`, `${s.onTime} daripada ${s.expected} tepat masa`, `${s.expected}次中${s.onTime}次准时`)}
                 </span>
               </div>
               <div className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-muted">
@@ -90,9 +91,9 @@ function Scorecard({ rows, lang }: { rows: SupplierScore[]; lang: Lang }) {
               </div>
               {(s.late > 0 || s.missing > 0) && (
                 <p className="mt-0.5 max-h-0 overflow-hidden text-[11px] text-muted-foreground opacity-0 transition-all duration-300 group-hover/score:max-h-6 group-hover/score:opacity-100" style={{ color: `var(--${tone}-11)` }}>
-                  {s.late > 0 && (ms ? `${s.late} lewat` : `${s.late} late`) + (s.typicalLateMin ? (ms ? ` (biasanya +${s.typicalLateMin} min)` : ` (usually +${s.typicalLateMin} min)`) : "")}
+                  {s.late > 0 && t3(`${s.late} late`, `${s.late} lewat`, `${s.late}次迟到`) + (s.typicalLateMin ? t3(` (usually +${s.typicalLateMin} min)`, ` (biasanya +${s.typicalLateMin} min)`, `（通常迟${s.typicalLateMin}分钟）`) : "")}
                   {s.late > 0 && s.missing > 0 && " · "}
-                  {s.missing > 0 && (ms ? `${s.missing} tidak datang` : `${s.missing} no-show`)}
+                  {s.missing > 0 && t3(`${s.missing} no-show`, `${s.missing} tidak datang`, `${s.missing}次没来`)}
                 </p>
               )}
             </li>
@@ -112,9 +113,9 @@ export function Deliveries({ enabled, today, recent, scorecard, lang }: { enable
       <ul className="mt-3 -mx-2">
         {!enabled && (
           <li className="px-2 py-3 text-sm text-muted-foreground">
-            {lang === "ms" ? "Tandakan kamera pintu belakang dalam " : "Tag a back-door camera in "}
+            {tr(lang, "Tag a back-door camera in ", "Tandakan kamera pintu belakang dalam ", "请在")}
             <a href="/setup" className="text-foreground underline underline-offset-2">{c.setup}</a>
-            {lang === "ms" ? " untuk log penghantaran." : " to start the delivery log."}
+            {tr(lang, " to start the delivery log.", " untuk log penghantaran.", "里设定后门镜头，才能开始送货记录。")}
           </li>
         )}
         {enabled && today.length === 0 && <li className="px-2 py-3 text-sm text-muted-foreground">{c.noData}</li>}

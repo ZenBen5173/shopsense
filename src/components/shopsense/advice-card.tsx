@@ -13,6 +13,7 @@ import { Spotlight } from "./spotlight";
 import { t } from "./i18n";
 import { post } from "./use-dashboard";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/domain/lang";
 
 function providerLabel(p: string, lang: Lang) {
   if (p.startsWith("bedrock:")) {
@@ -33,7 +34,7 @@ const TONE: Record<Alert["tone"], string> = {
 /** The day's advice as a short message an owner can forward to staff or keep in a chat. */
 export function briefText(o: { shop: string; dateLabel: string; sentences: string[]; visitors: number; lang: Lang }) {
   const head = `ShopSense · ${o.shop} · ${o.dateLabel}`;
-  const tail = o.lang === "ms" ? `Pengunjung setakat ini: ${o.visitors}` : `Visitors so far: ${o.visitors}`;
+  const tail = tr(o.lang, `Visitors so far: ${o.visitors}`, `Pengunjung setakat ini: ${o.visitors}`, `目前进店人数：${o.visitors}`);
   return [head, ...o.sentences.map((s) => `• ${s}`), tail].join("\n");
 }
 
@@ -64,7 +65,7 @@ export function AdviceCard({
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      toast.error(lang === "ms" ? "Tidak dapat menyalin" : "Couldn't copy");
+      toast.error(tr(lang, "Couldn't copy", "Tidak dapat menyalin", "复制失败"));
     }
   }
   const c = t(lang);
@@ -75,7 +76,7 @@ export function AdviceCard({
       const next = await post<Advice>("/api/advice", { lang });
       onAdvice(next);
       if (next.provider === "template")
-        toast.info(lang === "ms" ? "AI belum disambung. Ini nasihat luar talian." : "AI isn't connected yet, so this is the offline advice. Add AWS keys to use Bedrock.");
+        toast.info(tr(lang, "AI isn't connected yet, so this is the offline advice. Add AWS keys to use Bedrock.", "AI belum disambung. Ini nasihat luar talian.", "AI 还没连接，这是离线建议。加上 AWS 密钥即可使用 Bedrock。"));
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -147,11 +148,11 @@ export function AdviceCard({
             className="group/wa inline-flex items-center gap-1.5 rounded-full border border-[var(--grass-7)] bg-[var(--grass-3)] px-3 py-1.5 text-xs font-medium text-[var(--grass-11)] transition hover:-translate-y-0.5 hover:bg-[var(--grass-4)]"
           >
             <MessageCircle className="size-3.5 transition-transform duration-300 group-hover/wa:-rotate-12 group-hover/wa:scale-110" />
-            {lang === "ms" ? "Hantar ke WhatsApp" : "Send to WhatsApp"}
+            {tr(lang, "Send to WhatsApp", "Hantar ke WhatsApp", "发到 WhatsApp")}
           </a>
           <button
             onClick={copy}
-            aria-label={lang === "ms" ? "Salin nasihat" : "Copy advice"}
+            aria-label={tr(lang, "Copy advice", "Salin nasihat", "复制建议")}
             className="relative grid size-8 place-items-center rounded-full border border-border text-muted-foreground transition hover:-translate-y-0.5 hover:text-foreground"
           >
             <AnimatePresence mode="wait" initial={false}>

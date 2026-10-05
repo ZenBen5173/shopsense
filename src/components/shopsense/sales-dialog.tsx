@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { MagneticSave } from "./magnetic";
 import type { Lang } from "@/lib/domain/types";
 import { t } from "./i18n";
+import { tr } from "@/lib/domain/lang";
 import { post } from "./use-dashboard";
 
 export function SalesDialog({
@@ -49,7 +50,7 @@ export function SalesDialog({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!valid) {
-      setErr(lang === "ms" ? "Masukkan jumlah jualan." : "Enter today's sales.");
+      setErr(tr(lang, "Enter today's sales.", "Masukkan jumlah jualan.", "请输入今日营业额。"));
       return;
     }
     setSaving(true);
@@ -84,13 +85,13 @@ export function SalesDialog({
             <Label htmlFor="receipts">{c.receipts}</Label>
             <Input id="receipts" inputMode="numeric" className="text-lg tabular-nums" value={receipts} onChange={(e) => setReceipts(e.target.value.replace(/[^0-9]/g, ""))} placeholder="74" />
             <p className="text-[11px] text-muted-foreground">
-              {lang === "ms" ? "Tak pasti? Biarkan kosong — kami anggarkan dari purata bakul anda." : "Not sure? Leave it blank and we'll estimate it from your usual basket."}
+              {tr(lang, "Not sure? Leave it blank and we'll estimate it from your usual basket.", "Tak pasti? Biarkan kosong — kami anggarkan dari purata bakul anda.", "不确定？留空就好，我们会按你平常的客单价估算。")}
             </p>
           </div>
           <div className="flex items-center justify-between gap-3 pt-1">
             <p className="text-sm text-muted-foreground" aria-live="polite">
               {err ? <span className="text-[var(--red-11)]">{err}</span> : preview !== null ? (
-                lang === "ms" ? <>≈ <b className="text-foreground">{preview}%</b> daripada {visitors} pengunjung membeli</> : <>≈ <b className="text-foreground">{preview}%</b> of {visitors} visitors bought</>
+                lang === "ms" ? <>≈ <b className="text-foreground">{preview}%</b> daripada {visitors} pengunjung membeli</> : lang === "zh" ? <>{visitors}位进店顾客中约 <b className="text-foreground">{preview}%</b> 有买</> : <>≈ <b className="text-foreground">{preview}%</b> of {visitors} visitors bought</>
               ) : null}
             </p>
             <MagneticSave disabled={saving}>{c.save}</MagneticSave>

@@ -100,7 +100,7 @@ export function HoursChart({
       <div className="mt-2 flex gap-1 text-[10px] text-muted-foreground sm:gap-1.5">
         {hours.map((h) => (
           <span key={h} className={cn("flex-1 text-center", h === nowHour && "font-semibold text-foreground", h % 2 && "max-sm:invisible")}>
-            {lang === "ms" ? h : hourText(h, lang).replace("am", "a").replace("pm", "p")}
+            {lang === "en" ? hourText(h, lang).replace("am", "a").replace("pm", "p") : h}
           </span>
         ))}
       </div>

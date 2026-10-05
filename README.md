@@ -42,7 +42,7 @@ today at 60× speed. Watch customers arrive, the bread van at 07:10 and the
 lunch rush, then enter the day's sales.
 
 - **Replay a Saturday** (banner) shows the headline insight happening live.
-- **EN / BM** switches the advice to Bahasa Melayu.
+- **EN / BM / 中文** switches the whole app, advice included, to Bahasa Melayu or Simplified Chinese.
 - **How it works** (ⓘ) shows each snapshot next to the exact JSON the vision
   step returned.
 

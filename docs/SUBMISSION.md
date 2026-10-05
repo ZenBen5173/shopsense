@@ -88,7 +88,7 @@ postgresql, supabase, pglite, vercel, tailwindcss.
 3. Click **Replay a Saturday** in the banner, then wait for 12:00–12:30: the
    produce van arrives in the lunch rush, as the top insight predicted.
 4. Click **Enter today's sales** and type `1250` and `70`.
-5. Switch **EN → BM**.
+5. Switch **EN → BM → 中文**.
 6. Open **ⓘ How it works** to see real snapshots next to the vision JSON.
 7. To try real Ring data: **Setup** → paste a Ring Playground token → tag the
    cameras.
@@ -105,7 +105,7 @@ postgresql, supabase, pglite, vercel, tailwindcss.
 | 1:00–1:25 | Delivery log, hover a van snapshot, scorecard | "The back door logs deliveries. Bedrock reads the name on the van and checks it against the owner's list: on time, late, or missing." |
 | 1:25–2:00 | Replay a Saturday: 12:15, van arrives during the rush; link insight card | "And because ShopSense sees both doors, it notices what neither can alone: the produce van arrives inside the Saturday lunch rush, every week. And on the Thursdays the drinks lorry runs late, fewer visitors buy, about 264 ringgit a day." |
 | 2:00–2:15 | Closing dialog; percent updates | "At closing the owner types today's sales. Now we know how many visitors actually bought." |
-| 2:15–2:30 | EN → BM switch; "Written by Claude on Amazon Bedrock" | "The advice is written by Claude on Amazon Bedrock, in English or Bahasa Melayu, from numbers ShopSense computed. It never makes them up." |
+| 2:15–2:30 | EN → BM switch; "Written by Claude on Amazon Bedrock" | "The advice is written by Claude on Amazon Bedrock, in English, Bahasa Melayu or Chinese, from numbers ShopSense computed. It never makes them up." |
 | 2:30–2:45 | Setup: paste a Playground token, tag cameras; How it works page | "It runs on the Ring Partner API today, with any shop's real cameras. ShopSense: your Ring camera, now a business advisor." |
 
 ---

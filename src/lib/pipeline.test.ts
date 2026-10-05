@@ -44,6 +44,11 @@ describe("end-to-end pipeline on the demo shop", () => {
     expect(d2.today.conversion).toBeGreaterThan(0);
     const advice = templateAdvice(d2, "ms");
     expect(advice.length).toBeGreaterThanOrEqual(2);
+    const zh = await computeDashboard(db, "zh");
+    const zhAdvice = templateAdvice(zh, "zh");
+    expect(zhAdvice.join("")).toMatch(/[一-鿿]/); // real Chinese, not English fallback
+    expect(zh.insights[0].title).toMatch(/星期六/);
+    expect(zh.feed.some((f) => /顾客进店|送货|员工/.test(f.text))).toBe(true);
     const a = await getAdviceFor(db, d2, "ms");
     expect(a.provider).toBe("template");
     console.warn(JSON.stringify({ seedMs, dashMs, advice: templateAdvice(d, "en"), alerts: d.alerts, insights: d.insights.map((i) => i.title) }, null, 1));

@@ -18,6 +18,7 @@ import { useDashboard } from "@/components/shopsense/use-dashboard";
 import { t } from "@/components/shopsense/i18n";
 import type { Lang } from "@/lib/domain/types";
 import { WEEKDAY_NAMES } from "@/lib/domain/time";
+import { isLang, tr } from "@/lib/domain/lang";
 
 export default function Dashboard() {
   const [lang, setLang] = useState<Lang | null>(null);
@@ -27,7 +28,7 @@ export default function Dashboard() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("shopsense:lang");
-      if (saved === "en" || saved === "ms") setLang(saved);
+      if (isLang(saved)) setLang(saved);
     } catch {}
   }, []);
 
@@ -107,9 +108,9 @@ export default function Dashboard() {
 
         <footer className="flex flex-wrap items-center justify-between gap-2 pt-4 text-[11px] text-muted-foreground">
           <span>
-            ShopSense · Ring Partner API + Amazon Bedrock · {data.totals.events.toLocaleString()} {L === "ms" ? "peristiwa kamera" : "camera events"}
+            ShopSense · Ring Partner API + Amazon Bedrock · {data.totals.events.toLocaleString()} {tr(L, "camera events", "peristiwa kamera", "个镜头事件")}
           </span>
-          <span>{L === "ms" ? "Tiada wajah disimpan. Hanya kiraan." : "No faces stored. Only counts."}</span>
+          <span>{tr(L, "No faces stored. Only counts.", "Tiada wajah disimpan. Hanya kiraan.", "不储存人脸，只记录人数。")}</span>
         </footer>
       </main>
 
