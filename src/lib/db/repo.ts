@@ -219,6 +219,19 @@ export async function saveVision(db: Db, id: string, vision: VisionResult, provi
   );
 }
 
+/** Save many vision results in one statement. */
+export async function saveVisionBatch(db: Db, rows: { id: string; vision: VisionResult; provider: string }[]) {
+  for (let i = 0; i < rows.length; i += 1000) {
+    const chunk = rows.slice(i, i + 1000).map((r) => ({ id: r.id, v: r.vision, p: r.provider }));
+    await db.query(
+      `UPDATE events e SET vision_result = x.v, vision_provider = x.p, processed_at = now()
+         FROM jsonb_to_recordset($1::text::jsonb) AS x(id text, v jsonb, p text)
+        WHERE e.id = x.id`,
+      [JSON.stringify(chunk)],
+    );
+  }
+}
+
 export async function getEventRaw(db: Db, id: string) {
   const rows = await db.query<{ raw: unknown; occurred_at: unknown; camera_id: string }>(
     "SELECT raw, occurred_at, camera_id FROM events WHERE id = $1",

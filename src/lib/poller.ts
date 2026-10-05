@@ -21,17 +21,20 @@ import {
   countUnprocessed,
   eventIdsNear,
   releaseClaim,
-  saveVision,
+  saveVisionBatch,
   setCameraCursor,
 } from "./db/repo";
 import { now } from "./clock";
 import { getRingClient } from "./ring";
 import { RingAuthError, type RingClient } from "./ring/types";
-import { analyse } from "./vision";
+import { analyse, visionMode } from "./vision";
+import type { VisionResult } from "./domain/types";
 import { buildVisits, reconcileDay } from "./brains/back";
 import { localParts, zonedToUtc } from "./domain/time";
 
 const MAX_VISION_PER_TICK = Number(process.env.MAX_VISION_PER_TICK || 24);
+/** Offline perception is free and instant, so after an idle spell the demo catches up in one tick. */
+const MAX_OFFLINE_PER_TICK = 2000;
 const VISION_CONCURRENCY = 6;
 /**
  * Re-read this much history before the cursor on every poll. An event can
@@ -99,8 +102,12 @@ async function runTick(db: Db, opts: { ring?: RingClient | null }): Promise<Tick
     throw err;
   }
 
-  const batch = await claimUnprocessed(db, MAX_VISION_PER_TICK);
+  const cap = visionMode() === "offline" ? MAX_OFFLINE_PER_TICK : MAX_VISION_PER_TICK;
+  const batch = await claimUnprocessed(db, cap);
   let processed = 0;
+  // Results are written in one statement at the end: thousands of single-row
+  // updates over the network would take longer than the tick itself.
+  const results: { id: string; vision: VisionResult; provider: string }[] = [];
   await pool(batch, VISION_CONCURRENCY, async (ev) => {
     const ringEvent = { id: ev.id, deviceId: ev.cameraId, eventType: "motion", subType: ev.subType, start: Date.parse(ev.occurredAt), end: null, raw: ev.raw };
     let snap: Awaited<ReturnType<RingClient["getSnapshot"]>> | undefined;
@@ -119,7 +126,7 @@ async function runTick(db: Db, opts: { ring?: RingClient | null }): Promise<Tick
         await releaseClaim(db, ev.id); // snapshot not ready yet: try again next tick
         return;
       }
-      await saveVision(db, ev.id, out.vision, out.provider);
+      results.push({ id: ev.id, vision: out.vision, provider: out.provider });
       // Keep back-door JPEGs as delivery proof; front-door images are dropped.
       if (ev.role === "back" && snap && snap.mime === "image/jpeg" && out.vision.kind === "back" && out.vision.isDelivery) {
         await putSnapshot(db, ev.id, snap.mime, snap.bytes);
@@ -131,6 +138,8 @@ async function runTick(db: Db, opts: { ring?: RingClient | null }): Promise<Tick
     }
   });
 
+  if (results.length) await saveVisionBatch(db, results);
+
   if (processed > 0) {
     const today = localParts(nowD, shop.timezone).date;
     const dayStart = zonedToUtc(today, 0, shop.timezone);
@@ -140,5 +149,5 @@ async function runTick(db: Db, opts: { ring?: RingClient | null }): Promise<Tick
     await replaceDeliveryLog(db, today, records).catch((err) => console.warn("[poller] delivery log:", err.message));
   }
 
-  return { fetched, processed, remaining: batch.length === MAX_VISION_PER_TICK ? await countUnprocessed(db) : 0 };
+  return { fetched, processed, remaining: batch.length === cap ? await countUnprocessed(db) : 0 };
 }
