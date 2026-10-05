@@ -92,7 +92,7 @@ export default function Dashboard() {
             />
             <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
           </div>
-          <div className="min-w-0 space-y-5">
+          <div className="min-w-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
             <Deliveries enabled={data.deliveries.enabled} today={data.deliveries.today} recent={data.deliveries.recent} scorecard={data.deliveries.scorecard} lang={L} />
             <LiveFeed feed={data.feed} lang={L} simNow={data.clock.now} />
           </div>

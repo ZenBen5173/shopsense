@@ -20,6 +20,13 @@ business advice:
 Built for the Amazon **Build, Ship, Shape** Developer Hackathon 2026 (Ring
 track), on the **Ring Partner API** and **Amazon Bedrock**.
 
+![ShopSense dashboard](docs/screenshots/01-dashboard.png)
+
+| | |
+| --- | --- |
+| ![Full dashboard](docs/screenshots/02-dashboard-full.png) | ![What the AI sees](docs/screenshots/04-vision-step.png) |
+| ![Setup](docs/screenshots/05-setup.png) | ![Phone, Bahasa Melayu](docs/screenshots/06-mobile-bahasa.png) |
+
 ---
 
 ## Try it in 60 seconds
