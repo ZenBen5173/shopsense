@@ -97,7 +97,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <Insights insights={data.insights} lang={L} />
+        <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
         <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
           <div className="min-w-0">
             <WeekHeatmap heat={data.heatmap} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />

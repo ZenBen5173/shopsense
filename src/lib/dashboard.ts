@@ -12,7 +12,7 @@ import { addDays, hhmm, localParts, zonedToUtc } from "./domain/time";
 import type { DeliveryRecord, Lang, SalesDay, StoredEvent } from "./domain/types";
 import { busyProfile, conversion, footfallByDate, paceVsTypical, peakSlot, staffingPlan, weekCompare, weekHeatmap, type RotaDay, type WeekCompare } from "./brains/front";
 import { buildVisits, reconcileDay } from "./brains/back";
-import { allInsights, type Insight } from "./brains/link";
+import { allInsights, weeklyAtStake, type Insight } from "./brains/link";
 import { describeInsight, hourText, type InsightCopy } from "./advice/copy";
 import { bedrockConfigured } from "./ai/bedrock";
 
@@ -104,6 +104,7 @@ export interface DashboardData {
   peak: { weekday: number; hour: number; avg: number } | null;
   deliveries: { enabled: boolean; today: DeliveryRow[]; recent: DeliveryRow[]; scorecard: SupplierScore[] };
   insights: (Insight & InsightCopy)[];
+  atStakeWeek: number;
   alerts: Alert[];
   feed: FeedItem[];
   cameras: { id: string; name: string; role: string; source: string }[];
@@ -298,6 +299,7 @@ export async function computeDashboard(db: Db, langOverride?: Lang): Promise<Das
       scorecard: supplierScorecard(records, today, addDays(today, -28)),
     },
     insights,
+    atStakeWeek: weeklyAtStake(insights),
     alerts,
     feed: recent.map((e) => feedItem(e, lang)).filter((x): x is FeedItem => !!x && x.type !== "left").slice(0, 14),
     cameras: cameras.map((c) => ({ id: c.id, name: c.name, role: c.role, source: c.source })),

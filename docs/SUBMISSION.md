@@ -65,7 +65,7 @@ days), and rank busy hours within the shop's own history so a steady
 undercount doesn't change the answer. Playground tokens last 30 minutes and
 have no webhooks, so we built a serverless poller and a replay clock.
 
-**Accomplishments.** The link insights. They come out of the data on their own,
+**Accomplishments.** In the demo shop, ShopSense finds about RM460 a week at stake, from nothing but motion events and one number a day. And the link insights: They come out of the data on their own,
 and they are things an owner can act on tomorrow morning.
 
 **What we learned.** The model should say less than you'd think. Numbers come

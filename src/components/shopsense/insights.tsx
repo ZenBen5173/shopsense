@@ -16,13 +16,27 @@ const ICON = {
   quiet_hour: Clock3,
 } as const;
 
-export function Insights({ insights, lang }: { insights: DashboardData["insights"]; lang: Lang }) {
+export function Insights({ insights, lang, atStake, currency }: { insights: DashboardData["insights"]; lang: Lang; atStake: number; currency: string }) {
   const c = t(lang);
   const [open, setOpen] = useState<string | null>(insights[0]?.id ?? null);
 
   return (
     <section>
-      <PanelTitle title={c.linkTitle} sub={c.linkSub} />
+      <PanelTitle
+        title={c.linkTitle}
+        sub={c.linkSub}
+        right={
+          atStake > 0 ? (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="rounded-xl border border-[var(--amber-6)] bg-[var(--amber-2)] px-3 py-1.5 text-right">
+              <p className="font-display text-lg font-semibold tabular-nums text-[var(--amber-11)]">
+                ≈ {currency}
+                {atStake.toLocaleString()}
+              </p>
+              <p className="text-[10px] text-muted-foreground">{lang === "ms" ? "dipertaruhkan seminggu" : "at stake every week"}</p>
+            </motion.div>
+          ) : undefined
+        }
+      />
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {insights.map((ins, i) => {
           const Icon = ICON[ins.kind];

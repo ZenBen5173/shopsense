@@ -149,6 +149,8 @@ export function lateDeliverySalesDip(input: LinkInput): Insight[] {
         convGood: pct(good.c),
         buyersLost: Math.round(buyersLost),
         salesLost: Math.round(salesLost),
+        // That weekday comes once a week; weight by how often the supplier slips.
+        weeklyAtStake: Math.round((salesLost * g.bad.length) / Math.max(1, g.bad.length + g.good.length)),
       },
     });
   }
@@ -182,7 +184,7 @@ export function busyDayConversionDrop(input: LinkInput): Insight[] {
     kind: "busy_day_conversion_drop",
     link: false,
     score: salesLost,
-    facts: { convBusy: pct(avg(top)), convQuiet: pct(avg(bottom)), peakHour: hour, weekday, salesLostWeek: Math.round(salesLost) },
+    facts: { convBusy: pct(avg(top)), convQuiet: pct(avg(bottom)), peakHour: hour, weekday, salesLostWeek: Math.round(salesLost), weeklyAtStake: Math.round(salesLost) },
   }];
 }
 
@@ -207,6 +209,11 @@ export function quietHour(input: LinkInput): Insight[] {
     score: 5,
     facts: { weekday: best.wd, hour: best.h, avg: Math.round(best.v) },
   }];
+}
+
+/** Rough ringgit a week the insights put at stake, for the headline. Never counts the same loss twice per insight. */
+export function weeklyAtStake(insights: Insight[]): number {
+  return insights.reduce((sum, i) => sum + (Number(i.facts.weeklyAtStake) || 0), 0);
 }
 
 export function allInsights(input: LinkInput): Insight[] {
