@@ -144,6 +144,28 @@ function feedItem(e: StoredEvent & { cameraName: string }, lang: Lang): FeedItem
   return { ...base, role: "back", type: "other", text: v.description };
 }
 
+/**
+ * Past days never change between refreshes, so keep them in memory and only
+ * read today's events from the database each time. The cache key changes when
+ * history does (new rows, a demo reset, or a camera re-tagged).
+ */
+const historyCache = globalThis as unknown as { __shopsenseHistory?: { key: string; events: StoredEvent[] } };
+
+async function historyPlusToday(db: Db, from: Date, dayStart: Date, now: Date, roles: string): Promise<StoredEvent[]> {
+  const stamp = await db.query<{ n: unknown; last: unknown }>(
+    "SELECT count(*) AS n, max(processed_at) AS last FROM events WHERE occurred_at >= $1 AND occurred_at < $2 AND vision_result IS NOT NULL",
+    [from.toISOString(), dayStart.toISOString()],
+  );
+  const key = `${from.toISOString()}|${dayStart.toISOString()}|${stamp[0]?.n}|${String(stamp[0]?.last)}|${roles}`;
+  let past = historyCache.__shopsenseHistory?.key === key ? historyCache.__shopsenseHistory.events : null;
+  if (!past) {
+    past = await eventsBetween(db, from, new Date(dayStart.getTime() - 1));
+    historyCache.__shopsenseHistory = { key, events: past };
+  }
+  const today = now >= dayStart ? await eventsBetween(db, dayStart, now) : [];
+  return past.concat(today);
+}
+
 export async function computeDashboard(db: Db, langOverride?: Lang): Promise<DashboardData> {
   const [shop, clock, source, cameras, expected, totalEvents] = await Promise.all([
     getShop(db), getClock(db), getSource(db), listCameras(db), listExpected(db), countEvents(db),
@@ -157,7 +179,7 @@ export async function computeDashboard(db: Db, langOverride?: Lang): Promise<Das
   const from = zonedToUtc(addDays(today, -HISTORY_DAYS), 0, tz);
 
   const [events, sales, recent] = await Promise.all([
-    eventsBetween(db, from, nowD),
+    historyPlusToday(db, from, zonedToUtc(today, 0, tz), nowD, cameras.map((c) => `${c.id}:${c.role}`).join(",")),
     listSales(db, addDays(today, -HISTORY_DAYS), today),
     recentEvents(db, nowD, 40),
   ]);
