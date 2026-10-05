@@ -2,6 +2,8 @@
 
 **Your Ring camera already sees your business. ShopSense tells you what it saw.**
 
+**Live demo:** https://shopsense-khaki.vercel.app (no login; a simulated shop replaying today)
+
 ShopSense is a Ring Appstore app for single-camera small shops: corner stores,
 cafés, hardware shops, a Malaysian *kedai runcit*. It reuses the cameras the
 shop already owns for safety and turns their motion events into plain-language
@@ -43,7 +45,7 @@ lunch rush, then enter the day's sales.
 | --- | --- |
 | Ring Playground token | Setup → paste a token from the [Ring developer console](https://developer.amazon.com/ring/console/playground). It lasts ~30 min. Tag each camera Front door / Back door. |
 | Ring account link (OAuth + PKCE) | Set `RING_CLIENT_ID`, `RING_CLIENT_SECRET` (and `RING_REDIRECT_URI` if needed), then Setup → Link account. |
-| ring-sandbox emulator | `pip install "ring-sandbox[server]" && ring-sandbox serve --port 8787`, set `RING_API_BASE=http://127.0.0.1:8787`. Our scenario: `contrib/ring-sandbox/shop_day.yaml`. |
+| ring-sandbox emulator | `pip install "ring-sandbox[server]" && ring-sandbox serve --port 8787`, set `RING_API_BASE=http://127.0.0.1:8787`. Our scenario: `contrib/ring-sandbox/shop_day.yaml` (proposed upstream in [ring-sandbox#15](https://github.com/josepha-mayo/ring-sandbox/pull/15)). |
 | Webhooks | Register `https://<host>/api/ring/webhook` and set `RING_WEBHOOK_SECRET`; signatures are verified (HMAC-SHA256 over the raw body). |
 
 ## Turn on Amazon Bedrock

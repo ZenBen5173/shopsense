@@ -7,14 +7,14 @@ Mini challenges to tick: **AWS Builder** and **Open Source**. Attach the frictio
 
 ## Checklist
 
-- [ ] Public GitHub repo with the MIT LICENSE visible (or private, shared with testing@devpost.com and the named Amazon DevRel accounts)
-- [ ] Deployed URL that stays free to test until judging ends (demo mode needs no login)
+- [x] Public GitHub repo with the MIT LICENSE visible: https://github.com/ZenBen5173/shopsense
+- [x] Deployed URL, free to test, no login: https://shopsense-khaki.vercel.app (switch to the Neon database before judging, see README)
 - [ ] Video **under 3 minutes**, public on YouTube or Vimeo, in English
 - [ ] One recording with AWS credentials set, so the screen says "Written by Claude on Amazon Bedrock"
 - [ ] One live Ring Playground token pasted on camera (Setup → Ring Playground token)
 - [x] Ring availability in Malaysia checked: not officially sold. Script says "any shop with one Ring camera, shown here in Kuala Lumpur" (CRITIQUE §1)
 - [ ] Product feedback answer pasted (below), naming the AWS services used
-- [ ] Open Source: PR of `contrib/ring-sandbox/shop_day.yaml` to ring-sandbox; paste the PR URL, repo URL and GitHub username
+- [x] Open Source: PR https://github.com/josepha-mayo/ring-sandbox/pull/15 · repo https://github.com/ZenBen5173/shopsense · GitHub user ZenBen5173
 - [ ] Friction log (`docs/FRICTION_LOG.md`), re-checked with a live token
 - [ ] State what existed before the contest window (nothing; built during the window)
 
