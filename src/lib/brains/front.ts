@@ -135,3 +135,40 @@ export function paceVsTypical(today: DayFootfall | undefined, profile: BusyProfi
   const typical = profile.avgByHour.slice(0, untilHour + 1).reduce((a, b) => a + b, 0);
   return { soFar, typical: Math.round(typical), ratio: typical > 0 ? soFar / typical : null };
 }
+
+export interface RotaDay {
+  weekday: number;
+  /** [startHour, endHourExclusive] blocks that need an extra pair of hands. */
+  blocks: [number, number][];
+  peak: number;
+}
+
+/**
+ * A suggested rota: the hours across the whole week busy enough to need a
+ * second person at the counter. "Busy enough" is the shop's own top quarter of
+ * open hours, but never below `minPerHour` customers, so a quiet shop is not
+ * told to hire help it doesn't need.
+ */
+export function staffingPlan(heat: number[][], openAt: number, closeAt: number, minPerHour = 15): { days: RotaDay[]; extraHours: number; threshold: number } {
+  const first = Math.floor(openAt / 60);
+  const last = Math.min(23, Math.ceil(closeAt / 60) - 1);
+  const values: number[] = [];
+  heat.forEach((row) => row.forEach((v, h) => h >= first && h <= last && v > 0 && values.push(v)));
+  if (values.length === 0) return { days: [], extraHours: 0, threshold: 0 };
+  const sorted = [...values].sort((a, b) => a - b);
+  const p75 = sorted[Math.floor(sorted.length * 0.75)];
+  const threshold = Math.max(minPerHour, p75);
+  let extraHours = 0;
+  const days: RotaDay[] = heat.map((row, weekday) => {
+    const blocks: [number, number][] = [];
+    for (let h = first; h <= last; h++) {
+      if (row[h] < threshold) continue;
+      const lastBlock = blocks[blocks.length - 1];
+      if (lastBlock && lastBlock[1] === h) lastBlock[1] = h + 1;
+      else blocks.push([h, h + 1]);
+      extraHours++;
+    }
+    return { weekday, blocks, peak: Math.round(Math.max(0, ...row)) };
+  });
+  return { days, extraHours, threshold: Math.round(threshold) };
+}

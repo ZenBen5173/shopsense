@@ -9,6 +9,7 @@ import type { Lang } from "@/lib/domain/types";
 import { WEEKDAY_NAMES } from "@/lib/domain/time";
 import { t } from "./i18n";
 import { post } from "./use-dashboard";
+import { lastSaturday } from "./tour";
 import { cn } from "@/lib/utils";
 
 const SPEEDS = [1, 60, 300];
@@ -61,15 +62,6 @@ export function Header({ d, lang, setLang, refresh }: { d: DashboardData; lang: 
     }
   }
 
-  /** The most recent Saturday before today, for the "replay a Saturday" demo. */
-  function lastSaturday() {
-    const [y, m, dd] = d.clock.date.split("-").map(Number);
-    const base = new Date(Date.UTC(y, m - 1, dd));
-    const back = (base.getUTCDay() + 1) % 7 || 7;
-    base.setUTCDate(base.getUTCDate() - back);
-    return base.toISOString().slice(0, 10);
-  }
-
   return (
     <>
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-xl">
@@ -120,7 +112,7 @@ export function Header({ d, lang, setLang, refresh }: { d: DashboardData; lang: 
             </span>
             <span className="ml-auto flex gap-3">
               {d.clock.weekday !== 6 && (
-                <button onClick={() => reset(lastSaturday())} className="underline-offset-2 hover:text-foreground hover:underline">
+                <button onClick={() => reset(lastSaturday(d.clock.date))} className="underline-offset-2 hover:text-foreground hover:underline">
                   {c.replaySaturday}
                 </button>
               )}

@@ -3,7 +3,7 @@ import { generateDay, SIM_DEVICES, SIM_SHOP, SIM_SUPPLIERS, SIM_TZ } from "../si
 import { perceive } from "../vision/sim";
 import type { ExpectedDelivery, SalesDay, StoredEvent } from "../domain/types";
 import { addDays, localParts, zonedToUtc } from "../domain/time";
-import { busyProfile, footfallByDate, weekCompare } from "./front";
+import { busyProfile, footfallByDate, staffingPlan, weekCompare, weekHeatmap } from "./front";
 import { buildVisits, nameScore, reconcileDay } from "./back";
 import { allInsights } from "./link";
 
@@ -72,6 +72,20 @@ describe("front-door brain", () => {
     const sat = busyProfile(foot, 6);
     expect(sat.busyHours).toContain(12);
     expect(sat.samples).toBe(4);
+  });
+
+  it("suggests extra help on Saturday lunch, and none on a quiet morning", () => {
+    const plan = staffingPlan(weekHeatmap(foot), SIM_SHOP.openAt, SIM_SHOP.closeAt);
+    const sat = plan.days[6];
+    expect(sat.blocks.some(([a, b]) => a <= 12 && b > 12)).toBe(true);
+    expect(plan.days.every((d) => d.blocks.every(([a]) => a !== 9))).toBe(true);
+    expect(plan.extraHours).toBeGreaterThan(3);
+    expect(plan.extraHours).toBeLessThan(40);
+  });
+
+  it("never suggests help for a shop that is quiet all week", () => {
+    const quiet = Array.from({ length: 7 }, () => new Array(24).fill(0).map((_, h) => (h >= 8 && h < 20 ? 4 : 0)));
+    expect(staffingPlan(quiet, 8 * 60, 20 * 60).extraHours).toBe(0);
   });
 
   it("compares this week with last week", () => {

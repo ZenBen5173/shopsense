@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Sparkles } from "lucide-react";
+import { Check, Copy, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import TextAnimation from "@/components/ui/staggerText";
 import { GenerateButton } from "@/components/ui/generate-button";
@@ -30,8 +30,43 @@ const TONE: Record<Alert["tone"], string> = {
   info: "bg-[var(--indigo-3)] text-[var(--indigo-11)] border-[var(--indigo-6)]",
 };
 
-export function AdviceCard({ advice, alerts, lang, onAdvice }: { advice: Advice; alerts: Alert[]; lang: Lang; onAdvice: (a: Advice) => void }) {
+/** The day's advice as a short message an owner can forward to staff or keep in a chat. */
+export function briefText(o: { shop: string; dateLabel: string; sentences: string[]; visitors: number; lang: Lang }) {
+  const head = `ShopSense · ${o.shop} · ${o.dateLabel}`;
+  const tail = o.lang === "ms" ? `Pengunjung setakat ini: ${o.visitors}` : `Visitors so far: ${o.visitors}`;
+  return [head, ...o.sentences.map((s) => `• ${s}`), tail].join("\n");
+}
+
+export function AdviceCard({
+  advice,
+  alerts,
+  lang,
+  onAdvice,
+  shopName,
+  dateLabel,
+  visitors,
+}: {
+  advice: Advice;
+  alerts: Alert[];
+  lang: Lang;
+  onAdvice: (a: Advice) => void;
+  shopName: string;
+  dateLabel: string;
+  visitors: number;
+}) {
   const [working, setWorking] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const text = briefText({ shop: shopName, dateLabel, sentences: advice.sentences, visitors, lang });
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error(lang === "ms" ? "Tidak dapat menyalin" : "Couldn't copy");
+    }
+  }
   const c = t(lang);
 
   async function ask() {
@@ -100,9 +135,33 @@ export function AdviceCard({ advice, alerts, lang, onAdvice }: { advice: Advice;
         ))}
       </div>
 
-      <p className="mt-5 text-[11px] text-muted-foreground">
-        {c.writtenBy} {providerLabel(advice.provider, lang)}
-      </p>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[11px] text-muted-foreground">
+          {c.writtenBy} {providerLabel(advice.provider, lang)}
+        </p>
+        <div className="flex items-center gap-1.5">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="group/wa inline-flex items-center gap-1.5 rounded-full border border-[var(--grass-7)] bg-[var(--grass-3)] px-3 py-1.5 text-xs font-medium text-[var(--grass-11)] transition hover:-translate-y-0.5 hover:bg-[var(--grass-4)]"
+          >
+            <MessageCircle className="size-3.5 transition-transform duration-300 group-hover/wa:-rotate-12 group-hover/wa:scale-110" />
+            {lang === "ms" ? "Hantar ke WhatsApp" : "Send to WhatsApp"}
+          </a>
+          <button
+            onClick={copy}
+            aria-label={lang === "ms" ? "Salin nasihat" : "Copy advice"}
+            className="relative grid size-8 place-items-center rounded-full border border-border text-muted-foreground transition hover:-translate-y-0.5 hover:text-foreground"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span key={copied ? "ok" : "copy"} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ duration: 0.15 }}>
+                {copied ? <Check className="size-3.5 text-[var(--grass-11)]" /> : <Copy className="size-3.5" />}
+              </motion.span>
+            </AnimatePresence>
+          </button>
+        </div>
+      </div>
     </Spotlight>
   );
 }

@@ -10,7 +10,7 @@ import { getSource } from "./ring";
 import { visionMode } from "./vision";
 import { addDays, hhmm, localParts, zonedToUtc } from "./domain/time";
 import type { DeliveryRecord, Lang, SalesDay, StoredEvent } from "./domain/types";
-import { busyProfile, conversion, footfallByDate, paceVsTypical, peakSlot, weekCompare, weekHeatmap, type WeekCompare } from "./brains/front";
+import { busyProfile, conversion, footfallByDate, paceVsTypical, peakSlot, staffingPlan, weekCompare, weekHeatmap, type RotaDay, type WeekCompare } from "./brains/front";
 import { buildVisits, reconcileDay } from "./brains/back";
 import { allInsights, type Insight } from "./brains/link";
 import { describeInsight, hourText, type InsightCopy } from "./advice/copy";
@@ -100,6 +100,7 @@ export interface DashboardData {
   week: WeekCompare;
   trend: { date: string; visitors: number; conversion: number | null }[];
   heatmap: number[][];
+  rota: { days: RotaDay[]; extraHours: number; threshold: number };
   peak: { weekday: number; hour: number; avg: number } | null;
   deliveries: { enabled: boolean; today: DeliveryRow[]; recent: DeliveryRow[]; scorecard: SupplierScore[] };
   insights: (Insight & InsightCopy)[];
@@ -288,6 +289,7 @@ export async function computeDashboard(db: Db, langOverride?: Lang): Promise<Das
     week: weekCompare(foot, sales, today),
     trend,
     heatmap,
+    rota: staffingPlan(heatmap, shop.openAt, shop.closeAt),
     peak: peakSlot(heatmap),
     deliveries: {
       enabled: hasBack,

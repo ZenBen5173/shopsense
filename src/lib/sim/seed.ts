@@ -37,10 +37,14 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}) {
   }
 
   const rows: NewEvent[] = [];
-  for (let i = days; i >= 1; i--) {
+  const startMs = zonedToUtc(today, startAt, SIM_TZ).getTime();
+  for (let i = days; i >= 0; i--) {
     const date = addDays(today, -i);
     const day = simDay(date);
-    for (const e of day.events) {
+    // Today: only what already happened before the replay starts, so the very
+    // first screen is right; the rest arrives through the poller.
+    const events = i === 0 ? day.events.filter((e) => e.start <= startMs) : day.events;
+    for (const e of events) {
       rows.push({
         id: e.id,
         cameraId: e.deviceId,
@@ -53,15 +57,13 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}) {
         raw: { sim: true, truth: e.truth },
       });
     }
-    await upsertSales(db, { date, salesTotal: day.salesTotal, buyerCount: day.buyers }, "demo");
+    if (i > 0) await upsertSales(db, { date, salesTotal: day.salesTotal, buyerCount: day.buyers }, "demo");
   }
   await insertEvents(db, rows);
 
-  // Today's events arrive through the normal poller as the replay clock runs.
-  const dayStart = zonedToUtc(today, 0, SIM_TZ).getTime();
-  await setCameraCursor(db, SIM_DEVICES.front.id, dayStart);
-  await setCameraCursor(db, SIM_DEVICES.back.id, dayStart);
-  await setReplay(db, { at: zonedToUtc(today, startAt, SIM_TZ).getTime(), speed: opts.speed ?? 60, paused: false });
+  await setCameraCursor(db, SIM_DEVICES.front.id, startMs);
+  await setCameraCursor(db, SIM_DEVICES.back.id, startMs);
+  await setReplay(db, { at: startMs, speed: opts.speed ?? 60, paused: false });
 
   return { today, events: rows.length };
 }
