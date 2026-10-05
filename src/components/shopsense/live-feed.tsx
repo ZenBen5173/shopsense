@@ -33,7 +33,17 @@ export function LiveFeed({ feed, lang, simNow }: { feed: FeedItem[]; lang: Lang;
         }
       />
       <div className="mt-4 max-h-[420px] overflow-y-auto pr-1 scrollbar-thin">
-        <ActivityFeed events={events} icons={ICONS} refreshMs={5000} emptyState={<p className="text-sm text-muted-foreground">{c.noData}</p>} />
+        <ActivityFeed
+          events={events}
+          icons={ICONS}
+          refreshMs={5000}
+          formatTime={(m) => {
+            if (lang === "en") return null;
+            if (m < 1) return lang === "ms" ? "baru sahaja" : "刚刚";
+            if (m < 60) return lang === "ms" ? `${m} min lalu` : `${m}分钟前`;
+            const h = Math.floor(m / 60);
+            return lang === "ms" ? `${h} jam lalu` : `${h}小时前`;
+          }} emptyState={<p className="text-sm text-muted-foreground">{c.noData}</p>} />
       </div>
     </Spotlight>
   );

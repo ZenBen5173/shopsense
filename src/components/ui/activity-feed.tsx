@@ -65,6 +65,7 @@ export function ActivityFeed({
   fallbackIcon = Activity,
   /** How often the times refresh, in ms. Set 0 to leave them alone. */
   refreshMs = 30_000,
+  formatTime,
   emptyState,
   className,
 }: {
@@ -72,6 +73,8 @@ export function ActivityFeed({
   icons?: Record<string, LucideIcon>;
   fallbackIcon?: LucideIcon;
   refreshMs?: number;
+  /** ShopSense addition: localise "5m ago". Gets whole minutes; return null to use the default. */
+  formatTime?: (minutesAgo: number) => string | null;
   emptyState?: React.ReactNode;
   className?: string;
 }) {
@@ -135,7 +138,9 @@ export function ActivityFeed({
                     appears after mount. */}
                 <p className="mt-0.5 min-h-4 text-xs text-muted-foreground">
                   {now !== null && (
-                    <time dateTime={event.at}>{relative(event.at, now)}</time>
+                    <time dateTime={event.at}>
+                      {formatTime?.(Math.max(0, Math.round((now - new Date(event.at).getTime()) / 60000))) ?? relative(event.at, now)}
+                    </time>
                   )}
                 </p>
               </div>
