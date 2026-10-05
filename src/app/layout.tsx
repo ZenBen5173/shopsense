@@ -9,7 +9,10 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const instrument = Instrument_Sans({ variable: "--font-instrument-sans", subsets: ["latin"] });
 
+const site = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(site),
   title: "ShopSense — your Ring camera, now a business advisor",
   description:
     "ShopSense turns a small shop's existing Ring cameras into plain-language business advice: busy hours, how many visitors buy, and which supplier deliveries are hurting sales.",
