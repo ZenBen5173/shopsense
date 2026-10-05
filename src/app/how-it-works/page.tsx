@@ -39,7 +39,8 @@ function VisionInspector() {
   useEffect(() => {
     fetch("/api/events?limit=14").then((r) => r.json()).then((e: Ev[]) => {
       setEvents(e);
-      setSel(e.find((x) => x.role === "back")?.id ?? e[0]?.id ?? null);
+      const delivery = e.find((x) => x.role === "back" && x.vision.isDelivery === true && x.vision.supplierText);
+      setSel(delivery?.id ?? e.find((x) => x.role === "back")?.id ?? e[0]?.id ?? null);
     });
   }, []);
   const cur = events?.find((e) => e.id === sel);
