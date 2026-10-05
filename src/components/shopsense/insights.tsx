@@ -37,7 +37,7 @@ export function Insights({ insights, lang, atStake, currency }: { insights: Dash
           ) : undefined
         }
       />
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
+      <div className="mt-3 grid items-start gap-3 md:grid-cols-2">
         {insights.map((ins, i) => {
           const Icon = ICON[ins.kind];
           const isOpen = open === ins.id;
@@ -49,7 +49,7 @@ export function Insights({ insights, lang, atStake, currency }: { insights: Dash
               transition={{ delay: 0.1 + i * 0.07, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className={cn(ins.link && i < 2 && "md:col-span-1")}
             >
-              <Spotlight glow={ins.link ? "rgba(255,197,61,0.16)" : "rgba(99,102,241,0.14)"} className={cn("h-full", ins.link && "border-[var(--amber-6)]")}>
+              <Spotlight glow={ins.link ? "rgba(255,197,61,0.16)" : "rgba(99,102,241,0.14)"} className={cn(ins.link && "border-[var(--amber-6)]")}>
                 {ins.link && (
                   <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--amber-9)] to-transparent [animation:link-glow_3.6s_ease-in-out_infinite]" />
                 )}

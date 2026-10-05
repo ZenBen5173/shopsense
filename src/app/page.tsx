@@ -43,7 +43,7 @@ export default function Dashboard() {
       <main className="grid min-h-dvh place-items-center bg-background p-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <MathCurveLoader curve="rose" size={64} className="text-[var(--indigo-11)]" label="Loading ShopSense" />
-          <FlipFadeText words={t(lang ?? "en").loading} className="min-h-0 py-2" textClassName="text-sm font-medium tracking-wide text-muted-foreground" interval={1800} />
+          <FlipFadeText words={t(lang ?? "en").loading} className="min-h-0 py-2" textClassName="text-sm md:text-sm normal-case font-medium tracking-wide whitespace-pre text-muted-foreground dark:text-muted-foreground" interval={1800} />
           {error && <p className="max-w-sm text-sm text-[var(--red-11)]">{error}</p>}
         </div>
       </main>
@@ -90,6 +90,7 @@ export default function Dashboard() {
               closeAt={data.shop.closeAt}
               lang={L}
             />
+            <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
           </div>
           <div className="min-w-0 space-y-5">
             <Deliveries enabled={data.deliveries.enabled} today={data.deliveries.today} recent={data.deliveries.recent} scorecard={data.deliveries.scorecard} lang={L} />
@@ -97,7 +98,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
         <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
           <div className="min-w-0">
             <WeekHeatmap heat={data.heatmap} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />

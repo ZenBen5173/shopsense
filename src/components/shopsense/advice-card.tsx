@@ -122,7 +122,7 @@ export function AdviceCard({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        {alerts.slice(0, 3).map((a, i) => (
+        {alerts.filter((a) => !advice.sentences.includes(a.text)).slice(0, 3).map((a, i) => (
           <motion.span
             key={a.text}
             initial={{ opacity: 0, y: 6 }}
