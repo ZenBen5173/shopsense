@@ -1,128 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MathCurveLoader } from "@/components/ui/math-curve-loader";
-import { FlipFadeText } from "@/components/ui/flip-fade-text";
-import { Header } from "@/components/shopsense/header";
-import { AdviceCard } from "@/components/shopsense/advice-card";
-import { StatTiles } from "@/components/shopsense/stat-tiles";
-import { HoursChart } from "@/components/shopsense/hours-chart";
-import { WeekHeatmap } from "@/components/shopsense/week-heatmap";
-import { StaffingPlan } from "@/components/shopsense/staffing-plan";
-import { Tour } from "@/components/shopsense/tour";
-import { Insights } from "@/components/shopsense/insights";
-import { Deliveries } from "@/components/shopsense/deliveries";
-import { LiveFeed } from "@/components/shopsense/live-feed";
+import { useState } from "react";
+import { motion } from "motion/react";
+import { AppHeader } from "@/components/shopsense/header";
+import { DemoDock } from "@/components/shopsense/demo-dock";
 import { SalesDialog } from "@/components/shopsense/sales-dialog";
+import { AdvisorNote, FocusCard, Lights, TodayActions, TodoList } from "@/components/shopsense/today";
 import { useDashboard } from "@/components/shopsense/use-dashboard";
-import { t } from "@/components/shopsense/i18n";
-import type { Lang } from "@/lib/domain/types";
+import { LoadingScreen, useSavedLang } from "@/components/shopsense/shell";
 import { WEEKDAY_NAMES } from "@/lib/domain/time";
-import { isLang, tr } from "@/lib/domain/lang";
 
-export default function Dashboard() {
-  const [lang, setLang] = useState<Lang | null>(null);
+/**
+ * Today: the owner's whole day on one calm screen. One thing to do now, three
+ * traffic lights, a short to-do list. The numbers live on the Details page.
+ */
+export default function TodayPage() {
+  const [lang, setLang] = useSavedLang();
   const { data, error, refresh, setData } = useDashboard(lang);
   const [salesOpen, setSalesOpen] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("shopsense:lang");
-      if (isLang(saved)) setLang(saved);
-    } catch {}
-  }, []);
-
-  const chooseLang = (l: Lang) => {
-    setLang(l);
-    try {
-      localStorage.setItem("shopsense:lang", l);
-    } catch {}
-  };
-
-  if (!data) {
-    return (
-      <main className="grid min-h-dvh place-items-center bg-background p-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <MathCurveLoader curve="rose" size={64} className="text-[var(--indigo-11)]" label="Loading ShopSense" />
-          <FlipFadeText words={t(lang ?? "en").loading} className="min-h-0 py-2" textClassName="text-sm md:text-sm normal-case font-medium tracking-wide whitespace-pre text-muted-foreground dark:text-muted-foreground" interval={1800} />
-          {error && <p className="max-w-sm text-sm text-[var(--red-11)]">{error}</p>}
-        </div>
-      </main>
-    );
-  }
-
+  if (!data) return <LoadingScreen lang={lang} error={error} />;
   const L = lang ?? data.lang;
+  const v = data.owner;
 
   return (
-    <div className="min-h-dvh bg-background">
-      <Header d={data} lang={L} setLang={chooseLang} refresh={refresh} />
-      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-dvh bg-background pb-24">
+      <AppHeader shopName={data.shop.name} lang={L} setLang={setLang} />
+      <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:py-10">
         {error && <p className="rounded-lg border border-[var(--red-6)] bg-[var(--red-3)] px-3 py-2 text-sm text-[var(--red-11)]">{error}</p>}
-        {data.source === "sim" && (
-          <Tour
-            lang={L}
-            setLang={chooseLang}
-            date={data.clock.date}
-            isSaturday={data.clock.weekday === 6}
-            hasSales={!!data.today.sales}
-            openSales={() => setSalesOpen(true)}
-            refresh={refresh}
-          />
-        )}
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0 space-y-5">
-            <AdviceCard
-              advice={data.advice}
-              alerts={data.alerts}
-              lang={L}
-              onAdvice={(advice) => setData({ ...data, advice })}
-              shopName={data.shop.name}
-              dateLabel={`${WEEKDAY_NAMES[L][data.clock.weekday]} ${data.clock.date.slice(8)}/${data.clock.date.slice(5, 7)}`}
-              visitors={data.today.visitors}
-            />
-            <StatTiles d={data} lang={L} onEnterSales={() => setSalesOpen(true)} />
-            <HoursChart
-              today={data.today.byHour}
-              typical={data.today.typicalByHour}
-              busy={data.today.busyHours}
-              nowHour={Math.floor(data.clock.minuteOfDay / 60)}
-              openAt={data.shop.openAt}
-              closeAt={data.shop.closeAt}
-              lang={L}
-            />
-            <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
-          </div>
-          <div className="min-w-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
-            <Deliveries enabled={data.deliveries.enabled} today={data.deliveries.today} recent={data.deliveries.recent} scorecard={data.deliveries.scorecard} lang={L} />
-            <LiveFeed feed={data.feed} lang={L} simNow={data.clock.now} />
-          </div>
-        </div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+          <p className="text-sm text-muted-foreground">
+            {WEEKDAY_NAMES[L][data.clock.weekday]} · <span className="tabular-nums">{data.clock.local}</span>
+          </p>
+          <p className="mt-0.5 font-display text-3xl font-semibold tracking-tight">{v.greeting}</p>
+        </motion.div>
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0">
-            <WeekHeatmap heat={data.heatmap} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />
-          </div>
-          <StaffingPlan rota={data.rota} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />
-        </div>
-
-        <footer className="flex flex-wrap items-center justify-between gap-2 pt-4 text-[11px] text-muted-foreground">
-          <span>
-            ShopSense · Ring Partner API + Amazon Bedrock · {data.totals.events.toLocaleString()} {tr(L, "camera events", "peristiwa kamera", "个镜头事件")}
-          </span>
-          <span>{tr(L, "No faces stored. Only counts.", "Tiada wajah disimpan. Hanya kiraan.", "不储存人脸，只记录人数。")}</span>
-        </footer>
+        <FocusCard focus={v.focus} lang={L} />
+        <Lights view={v} lang={L} onSales={() => setSalesOpen(true)} />
+        <TodoList todo={v.todo} date={data.clock.date} lang={L} />
+        <AdvisorNote advice={data.advice} lang={L} onAdvice={(advice) => setData({ ...data, advice })} />
+        <TodayActions view={v} shopName={data.shop.name} lang={L} />
       </main>
 
-      <SalesDialog
-        open={salesOpen}
-        onOpenChange={setSalesOpen}
-        lang={L}
-        currency={data.shop.currency}
-        initial={data.today.sales}
-        visitors={data.today.visitors}
-        onSaved={refresh}
-      />
+      <SalesDialog open={salesOpen} onOpenChange={setSalesOpen} lang={L} currency={data.shop.currency} initial={data.today.sales} visitors={data.today.visitors} onSaved={refresh} />
+      <DemoDock d={data} lang={L} refresh={refresh} />
     </div>
   );
 }

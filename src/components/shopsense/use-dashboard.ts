@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { DashboardData } from "@/lib/dashboard";
 import type { Advice } from "@/lib/advice";
 import type { Lang } from "@/lib/domain/types";
+import type { OwnerView } from "@/lib/owner";
 
-export type DashboardResponse = DashboardData & { advice: Advice };
+export type DashboardResponse = DashboardData & { advice: Advice; owner: OwnerView };
 
 /**
  * Keeps the dashboard live: every few seconds it asks the server to poll Ring

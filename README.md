@@ -41,10 +41,12 @@ a simulated Ring account with two cameras and four weeks of history, replaying
 today at 60× speed. Watch customers arrive, the bread van at 07:10 and the
 lunch rush, then enter the day's sales.
 
-- **Replay a Saturday** (banner) shows the headline insight happening live.
+- **Today** is what an owner sees: one thing to do now, three traffic lights
+  (customers, deliveries, sales) and a short to-do list. No charts, no
+  percentages. **Details** holds the charts for owners who want them.
+- **Demo** (bottom-right button) holds the replay clock, **Replay a busy
+  Saturday** and **See what the AI sees**, kept out of the owner's view.
 - **EN / BM / 中文** switches the whole app, advice included, to Bahasa Melayu or Simplified Chinese.
-- **How it works** (ⓘ) shows each snapshot next to the exact JSON the vision
-  step returned.
 
 ## Use real Ring data
 
@@ -100,7 +102,7 @@ Ring camera ──motion──▶ Event History (poll)  ┐
  footfall, busy hrs   delivery visits,      delivery-in-rush,
  visitors who bought  late / missing        late-delivery sales dip
    └─────────────────────┼─────────────────────┘
-                 Bedrock text ──▶ 2–3 sentences of advice (EN / BM)
+                 Bedrock text ──▶ plain advice (EN / BM / 中文)
                          │
                    one-screen dashboard
 ```

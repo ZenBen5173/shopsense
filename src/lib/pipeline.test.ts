@@ -4,6 +4,7 @@ import { seedDemo } from "./sim/seed";
 import { tick } from "./poller";
 import { computeDashboard } from "./dashboard";
 import { getAdviceFor, templateAdvice } from "./advice";
+import { ownerView } from "./owner";
 import { setReplay } from "./clock";
 import { upsertSales } from "./db/repo";
 import { zonedToUtc } from "./domain/time";
@@ -44,6 +45,14 @@ describe("end-to-end pipeline on the demo shop", () => {
     expect(d2.today.conversion).toBeGreaterThan(0);
     const advice = templateAdvice(d2, "ms");
     expect(advice.length).toBeGreaterThanOrEqual(2);
+    // The owner's screen: one focus, short words, at most three to-dos, no percentages.
+    const own = ownerView(d, "en");
+    expect(own.focus.title.length).toBeLessThan(45);
+    expect(own.todo.length).toBeGreaterThan(0);
+    expect(own.todo.length).toBeLessThanOrEqual(3);
+    expect(JSON.stringify(own)).not.toMatch(/%/);
+    expect(own.deliveries.word).toMatch(/on time|still coming|late|hasn't come/);
+    expect(ownerView(d2, "zh").sales.word).toMatch(/每10位顾客/);
     const zh = await computeDashboard(db, "zh");
     const zhAdvice = templateAdvice(zh, "zh");
     expect(zhAdvice.join("")).toMatch(/[一-鿿]/); // real Chinese, not English fallback

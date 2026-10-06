@@ -82,14 +82,15 @@ postgresql, supabase, pglite, vercel, tailwindcss.
 
 ## Testing instructions (for judges)
 
-1. Open the deployed URL. No login. The demo shop loads with a month of
-   history and today replaying at 60×.
-2. Watch the counters and the live feed. Hover a delivery to see its snapshot.
-3. Click **Replay a Saturday** in the banner, then wait for 12:00–12:30: the
-   produce van arrives in the lunch rush, as the top insight predicted.
-4. Click **Enter today's sales** and type `1250` and `70`.
-5. Switch **EN → BM → 中文**.
-6. Open **ⓘ How it works** to see real snapshots next to the vision JSON.
+1. Open the deployed URL. No login. The **Today** screen shows what an owner
+   would see: one thing to do now, three traffic lights, a short to-do list.
+2. Tick a to-do. Tap **Sales** and type `1250` (receipts optional).
+3. Tap **Demo** (bottom-right) → **Replay a busy Saturday**, then watch around
+   12:00–12:30: the produce van arrives in the lunch rush.
+4. Switch **EN → BM → 中文**.
+5. Open **Details** for the charts: busy hours, delivery log, supplier record,
+   insights with money at stake, week heatmap, staff rota.
+6. **Demo → See what the AI sees** shows real snapshots next to the vision JSON.
 7. To try real Ring data: **Setup** → paste a Ring Playground token → tag the
    cameras.
 
