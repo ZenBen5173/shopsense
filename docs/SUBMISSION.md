@@ -88,8 +88,9 @@ postgresql, supabase, pglite, vercel, tailwindcss.
 3. Tap **Demo** (bottom-right) → **Replay a busy Saturday**, then watch around
    12:00–12:30: the produce van arrives in the lunch rush.
 4. Switch **EN → BM → 中文**.
-5. Open **Details** for the charts: busy hours, delivery log, supplier record,
-   insights with money at stake, week heatmap, staff rota.
+5. Open **Details**: four tabs in plain words. **Busy times** (today and a
+   usual week, with where to add a helper), **Suppliers** (who you can count
+   on), **Earn more** (ideas with ringgit a week attached), **Camera log**.
 6. **Demo → See what the AI sees** shows real snapshots next to the vision JSON.
 7. To try real Ring data: **Setup** → paste a Ring Playground token → tag the
    cameras.

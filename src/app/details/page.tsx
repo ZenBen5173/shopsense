@@ -1,68 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { AppHeader } from "@/components/shopsense/header";
 import { DemoDock } from "@/components/shopsense/demo-dock";
-import { StatTiles } from "@/components/shopsense/stat-tiles";
 import { HoursChart } from "@/components/shopsense/hours-chart";
-import { WeekHeatmap } from "@/components/shopsense/week-heatmap";
-import { StaffingPlan } from "@/components/shopsense/staffing-plan";
-import { Insights } from "@/components/shopsense/insights";
-import { Deliveries } from "@/components/shopsense/deliveries";
-import { LiveFeed } from "@/components/shopsense/live-feed";
 import { SalesDialog } from "@/components/shopsense/sales-dialog";
+import { BusyHeadline, CameraLog, DetailsTabs, EarnPanel, SuppliersPanel, WeekList, type DetailsTab } from "@/components/shopsense/details";
 import { useDashboard } from "@/components/shopsense/use-dashboard";
 import { LoadingScreen, useSavedLang } from "@/components/shopsense/shell";
 import { tr } from "@/lib/domain/lang";
 
-/** Everything behind the Today screen, for the owner who wants the numbers. */
+const TABS: DetailsTab[] = ["busy", "suppliers", "earn", "log"];
+
+/**
+ * Details: the numbers behind Today, split into four questions an owner asks.
+ * One tab at a time, so the page never shows everything at once.
+ */
 export default function DetailsPage() {
   const [lang, setLang] = useSavedLang();
   const { data, error, refresh } = useDashboard(lang);
   const [salesOpen, setSalesOpen] = useState(false);
+  const [tab, setTabState] = useState<DetailsTab>("busy");
+
+  // Remember the tab in the address (#suppliers), so a link or refresh keeps it.
+  useEffect(() => {
+    const h = window.location.hash.slice(1) as DetailsTab;
+    if (TABS.includes(h)) setTabState(h);
+  }, []);
+  const setTab = (t: DetailsTab) => {
+    setTabState(t);
+    history.replaceState(null, "", `#${t}`);
+  };
 
   if (!data) return <LoadingScreen lang={lang} error={error} />;
   const L = lang ?? data.lang;
+  const v = data.details;
+  const problems = v.suppliers.today.filter((r) => r.tone === "bad" || r.tone === "warn").length;
 
   return (
-    <div className="min-h-dvh bg-background pb-20">
+    <div className="min-h-dvh bg-background pb-24">
       <AppHeader shopName={data.shop.name} lang={L} setLang={setLang} />
-      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:py-10">
         {error && <p className="rounded-lg border border-[var(--red-6)] bg-[var(--red-3)] px-3 py-2 text-sm text-[var(--red-11)]">{error}</p>}
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0 space-y-5">
-            <StatTiles d={data} lang={L} onEnterSales={() => setSalesOpen(true)} />
-            <HoursChart
-              today={data.today.byHour}
-              typical={data.today.typicalByHour}
-              busy={data.today.busyHours}
-              nowHour={Math.floor(data.clock.minuteOfDay / 60)}
-              openAt={data.shop.openAt}
-              closeAt={data.shop.closeAt}
-              lang={L}
-            />
-            <Insights insights={data.insights} lang={L} atStake={data.atStakeWeek} currency={data.shop.currency} />
-          </div>
-          <div className="min-w-0 space-y-5 lg:sticky lg:top-20 lg:self-start">
-            <Deliveries enabled={data.deliveries.enabled} today={data.deliveries.today} recent={data.deliveries.recent} scorecard={data.deliveries.scorecard} lang={L} />
-            <LiveFeed feed={data.feed} lang={L} simNow={data.clock.now} />
-          </div>
-        </div>
+        <DetailsTabs tab={tab} setTab={setTab} lang={L} problems={problems} />
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0">
-            <WeekHeatmap heat={data.heatmap} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />
-          </div>
-          <StaffingPlan rota={data.rota} openAt={data.shop.openAt} closeAt={data.shop.closeAt} todayWd={data.clock.weekday} lang={L} />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className="space-y-6">
+            {tab === "busy" && (
+              <>
+                <BusyHeadline busy={v.busy} />
+                <HoursChart
+                  today={data.today.byHour}
+                  typical={data.today.typicalByHour}
+                  busy={data.today.busyHours}
+                  nowHour={Math.floor(data.clock.minuteOfDay / 60)}
+                  openAt={data.shop.openAt}
+                  closeAt={data.shop.closeAt}
+                  lang={L}
+                />
+                <WeekList week={v.week} lang={L} />
+              </>
+            )}
+            {tab === "suppliers" && <SuppliersPanel s={v.suppliers} lang={L} />}
+            {tab === "earn" && <EarnPanel compare={v.compare} earn={v.earn} lang={L} currency={data.shop.currency} onSales={() => setSalesOpen(true)} />}
+            {tab === "log" && <CameraLog log={v.log} lang={L} simNow={data.clock.now} />}
+          </motion.div>
+        </AnimatePresence>
 
-        <footer className="flex flex-wrap items-center justify-between gap-2 pt-4 text-[11px] text-muted-foreground">
-          <span>
-            ShopSense · Ring Partner API + Amazon Bedrock · {data.totals.events.toLocaleString()} {tr(L, "camera events", "peristiwa kamera", "个镜头事件")}
-          </span>
-          <span>{tr(L, "No faces stored. Only counts.", "Tiada wajah disimpan. Hanya kiraan.", "不储存人脸，只记录人数。")}</span>
-        </footer>
+        <p className="pt-2 text-center text-xs text-muted-foreground">{tr(L, "No faces stored. Only counts.", "Tiada wajah disimpan. Hanya kiraan.", "不储存人脸，只记录人数。")}</p>
       </main>
 
       <SalesDialog open={salesOpen} onOpenChange={setSalesOpen} lang={L} currency={data.shop.currency} initial={data.today.sales} visitors={data.today.visitors} onSaved={refresh} />

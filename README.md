@@ -20,10 +20,11 @@ business advice:
 Built for the Amazon **Build, Ship, Shape** Developer Hackathon 2026 (Ring
 track), on the **Ring Partner API** and **Amazon Bedrock**.
 
-![ShopSense dashboard](docs/screenshots/01-dashboard.png)
+| Today | Busy times | Suppliers | Earn more |
+| --- | --- | --- | --- |
+| ![Today](docs/screenshots/00-today-phone.png) | ![Busy times](docs/screenshots/08-details-busy.png) | ![Suppliers](docs/screenshots/09-details-suppliers.png) | ![Earn more](docs/screenshots/10-details-earn.png) |
 
-| | |
-| --- | --- |
+--- | --- |
 | ![Full dashboard](docs/screenshots/02-dashboard-full.png) | ![What the AI sees](docs/screenshots/04-vision-step.png) |
 | ![Setup](docs/screenshots/05-setup.png) | ![Phone, Bahasa Melayu](docs/screenshots/06-mobile-bahasa.png) |
 
@@ -43,7 +44,8 @@ lunch rush, then enter the day's sales.
 
 - **Today** is what an owner sees: one thing to do now, three traffic lights
   (customers, deliveries, sales) and a short to-do list. No charts, no
-  percentages. **Details** holds the charts for owners who want them.
+  percentages. **Details** answers four questions in tabs: busy times, suppliers,
+  ways to earn more, and the camera log.
 - **Demo** (bottom-right button) holds the replay clock, **Replay a busy
   Saturday** and **See what the AI sees**, kept out of the owner's view.
 - **EN / BM / 中文** switches the whole app, advice included, to Bahasa Melayu or Simplified Chinese.

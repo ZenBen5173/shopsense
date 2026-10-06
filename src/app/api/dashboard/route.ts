@@ -2,6 +2,7 @@ import { readyDb, jsonError } from "@/lib/server/ready";
 import { computeDashboard } from "@/lib/dashboard";
 import { getAdviceFor } from "@/lib/advice";
 import { ownerView } from "@/lib/owner";
+import { detailsView } from "@/lib/details-view";
 import type { Lang } from "@/lib/domain/types";
 import { isLang } from "@/lib/domain/lang";
 
@@ -14,7 +15,7 @@ export async function GET(req: Request) {
     const lang: Lang | undefined = isLang(q) ? q : undefined;
     const data = await computeDashboard(db, lang);
     const advice = await getAdviceFor(db, data, data.lang, false);
-    return Response.json({ ...data, advice, owner: ownerView(data, data.lang) });
+    return Response.json({ ...data, advice, owner: ownerView(data, data.lang), details: detailsView(data, data.lang) });
   } catch (err) {
     return jsonError(err);
   }

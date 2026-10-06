@@ -5,6 +5,7 @@ import { tick } from "./poller";
 import { computeDashboard } from "./dashboard";
 import { getAdviceFor, templateAdvice } from "./advice";
 import { ownerView } from "./owner";
+import { detailsView } from "./details-view";
 import { setReplay } from "./clock";
 import { upsertSales } from "./db/repo";
 import { zonedToUtc } from "./domain/time";
@@ -53,6 +54,14 @@ describe("end-to-end pipeline on the demo shop", () => {
     expect(JSON.stringify(own)).not.toMatch(/%/);
     expect(own.deliveries.word).toMatch(/on time|still coming|late|hasn't come/);
     expect(ownerView(d2, "zh").sales.word).toMatch(/每10位顾客/);
+    // Details in plain words: a week of 7 days, suppliers in counts, no percentages.
+    const det = detailsView(d2, "en");
+    expect(det.week.days).toHaveLength(7);
+    expect(det.week.days.find((x) => x.top)?.name).toBe("Saturday");
+    expect(det.suppliers.record.every((r) => r.onTime + r.late + r.missing <= r.total)).toBe(true);
+    expect(det.compare.bought.value).toMatch(/in 10/);
+    expect(det.earn.items.every((i) => i.action.length < 70)).toBe(true);
+    expect(JSON.stringify({ ...det, earn: { ...det.earn, items: det.earn.items.map((i) => ({ ...i, detail: "" })) } })).not.toMatch(/%/);
     const zh = await computeDashboard(db, "zh");
     const zhAdvice = templateAdvice(zh, "zh");
     expect(zhAdvice.join("")).toMatch(/[一-鿿]/); // real Chinese, not English fallback

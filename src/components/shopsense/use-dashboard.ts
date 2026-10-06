@@ -5,8 +5,9 @@ import type { DashboardData } from "@/lib/dashboard";
 import type { Advice } from "@/lib/advice";
 import type { Lang } from "@/lib/domain/types";
 import type { OwnerView } from "@/lib/owner";
+import type { DetailsView } from "@/lib/details-view";
 
-export type DashboardResponse = DashboardData & { advice: Advice; owner: OwnerView };
+export type DashboardResponse = DashboardData & { advice: Advice; owner: OwnerView; details: DetailsView };
 
 /**
  * Keeps the dashboard live: every few seconds it asks the server to poll Ring
