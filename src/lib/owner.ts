@@ -98,8 +98,10 @@ export function ownerView(d: DashboardData, lang: Lang): OwnerView {
 
   // 3. At most three short to-dos.
   const todo: OwnerView["todo"] = [];
-  const future = busy.filter((h) => h >= hour);
-  if (future.length) todo.push({ id: "staff", text: t3(`2 people at the counter ${hourRanges(future, lang)}`, `2 orang di kaunter ${hourRanges(future, lang)}`, `${hourRanges(future, lang)} 柜台安排两个人`) });
+  // Skip the rush happening right now: the big card already says it.
+  const current = inRush ? busy.filter((h) => h >= hour).reduce((end, h) => (h === end ? h + 1 : end), hour) : hour;
+  const future = busy.filter((h) => h >= current);
+  if (future.length) todo.push({ id: `staff-${future[0]}`, text: t3(`2 people at the counter ${hourRanges(future, lang)}`, `2 orang di kaunter ${hourRanges(future, lang)}`, `${hourRanges(future, lang)} 柜台安排两个人`) });
   const top = d.insights.find((i) => i.link && i.facts.weekday === d.clock.weekday) ?? d.insights.find((i) => i.link);
   if (top) {
     const sup = String(top.facts.supplier ?? "");
